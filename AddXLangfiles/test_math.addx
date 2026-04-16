@@ -1,0 +1,11 @@
+def main() -> int {
+    x: int = 5
+    y: int = 10
+    print(x)
+    print(" + ")
+    print(y)
+    print(" = ")
+    print(x + y)
+    print("\n")
+    return 0
+}
