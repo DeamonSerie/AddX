@@ -12,8 +12,6 @@ typedef struct {
     size_t globals_size;
     Function* functions;
     size_t function_count;
-    char** global_names;
-    size_t global_count;
 } VM;
 
 VM* create_vm(CompiledProgram* prog);
