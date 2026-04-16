@@ -1,0 +1,7 @@
+def main() -> int {
+    name: str = "AddX"
+    print("Hello, ")
+    print(name)
+    print("!\n")
+    return 0
+}
