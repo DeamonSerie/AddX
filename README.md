@@ -1,179 +1,265 @@
-# AddX Language
+# AddX Compiler & JIT Runtime
 
-AddX is a programming language that combines Python-like syntax with C++-style type systems. It provides both an interpreted execution via a virtual machine and compilation to C++ for high-performance applications.
+AddX is a custom programming language compiler with both a virtual machine (VM) interpreter and a Just-In-Time (JIT) compiler targeting x64 Windows. This guide explains how to build, use, and extend the AddX system.
 
-## Project Overview
+## Features
 
-This repository contains implementations of the AddX language in both Python and C:
+- **Parsing**: Indentation-based syntax (similar to Python)
+- **Compilation**: AST → bytecode
+- **Execution Modes**:
+  - Stack-based Virtual Machine (VM)
+  - Native JIT compilation (Windows x64)
+- **Language Support**:
+  - Variables, functions, control flow (`if`, `while`, `for`)
+  - Basic types: numbers, strings, booleans, `None`
+  - Lists, attribute access, function calls
+  - Basic object-oriented features (classes, attributes)
+  - Pointer operations (`&`, `*`, `sizeof`)
+  - Memory management (`new`, `delete`)
+  - Standard output (`print`)
 
-- **Python Implementation**: The primary development and testing environment
-- **C Implementation**: A high-performance alternative that mirrors the Python architecture
-
-## File Structure
-
-```
-AddX/
-├── # Python Implementation
-├── addxrun.py          # Simple interpreter for quick testing
-├── compiler.py         # Full compiler to bytecode
-├── vm.py              # AddX Virtual Machine
-├── parser.py          # Parser with optional tokenization skipping
-├── tokenizer.py       # Tokenizer
-├── ast_nodes.py       # Abstract Syntax Tree nodes
-├── pycpp_parser.py    # Python-like to C++ transpiler
-├── *.addx             # AddX source files (tests and examples)
-│
-├── # C Implementation (in c/ directory)
-├── c/
-│   ├── avm.h/c        # AddX Virtual Machine (extended opcode set)
-│   ├── simple_main.c  # Simple C VM example
-│   ├── parser.h/c     # C parser with tokenization skipping
-│   ├── compiler.h/c   # C compiler
-│   ├── vm.h/c         # C VM (original)
-│   ├── tokenizer.h/c  # C tokenizer
-│   ├── ast.h/c        # C AST nodes
-│   ├── fast_parse.h/c # Fast parser
-│   ├── jit.h/c        # JIT compiler
-│   └── test_*.c       # C test programs
-│
-└── # Documentation
-    ├── SPEC.md                # Language specification
-    ├── CHANGES.md             # Record of modifications
-    ├── ADDX_USAGE_GUIDE.md    # Detailed Python usage guide
-    └── README.md              # This file
-```
-
-## Getting Started
+## Building the Project
 
 ### Prerequisites
 
-- Python 3.6+ (for Python tools)
-- C++ compiler (gcc/clang/MSVC) (for C tools and compiled output)
+- **Windows** (for JIT component)
+- **GCC compiler** (via MSYS2, MinGW-w64, or similar)
+- **Code::Blocks** (optional, for IDE builds)
 
-### Running AddX Programs
-
-#### Using the Python Interpreter (addxrun.py)
-
-```bash
-python addxrun.py hello.addx
-```
-
-#### Using the Full Python Compiler and VM
+### Command Line Build
 
 ```bash
-python compiler.py hello.addx
+# Compile all source files into an executable
+gcc -o AddX.exe main.c fast_parse.c compiler.c vm.c jit.c
+
+# For debugging builds, you may want to add:
+gcc -g -o AddX.exe main.c fast_parse.c compiler.c vm.c jit.c
 ```
 
-#### Using the C Implementation
+### Code::Blocks Build
+
+1. Open `AddX.cbp` in Code::Blocks
+2. Select Build Target: `Debug` or `Release`
+3. Click Build (or press F9)
+4. The executable will be generated in `bin/Debug/AddX.exe` or `bin/Release/AddX.exe`
+
+## Using the Compiler
+
+### Basic Usage
 
 ```bash
-# Compile the C VM (requires MSVC or gcc)
-cd c
-cl /nologo /W4 tokenizer.c parser.c ast.c avm.c test_parse_source.c /Fe:test_parse_source.exe
-# or with gcc: gcc -o test_parse_source tokenizer.c parser.c ast.c avm.c test_parse_source.c
+# Run with VM interpreter (default)
+AddX.exe your_program.addx
 
-# Run an AddX program
-test_parse_source.exe
+# Run with JIT compiler
+AddX.exe your_program.addx --jit
 ```
 
-## Key Features
+### Command Line Arguments
 
-### Python Version
-- Modular design: tokenizer, parser, compiler, VM as separate components
-- Optional tokenization skipping for performance
-- Full language support: variables, control flow, functions, OOP, memory management, etc.
-- Comprehensive test suite
-
-### C Version
-- Mirror of Python architecture
-- Extended AVM with 45 opcodes supporting full language features
-- Manual memory management similar to C++
-- Tokenizer and parser with optional tokenization skipping
-- Separate VM implementation for performance comparison
-
-## Skipping Tokenization
-
-Both Python and C implementations support skipping the tokenization step when you already have tokens:
-
-**Python:**
-```python
-from tokenizer import tokenize
-from parser import parse
-
-source = '''def main() -> int {
-    print("Hello from AddX!")
-    return 0
-}'''
-
-# Tokenize once
-tokens = tokenize(source)
-
-# Parse multiple times without re-tokenizing
-ast1 = parse(source, tokens=tokens)
-ast2 = parse(source, tokens=tokens)  # No re-tokenization occurs
+```
+AddX.exe <file.addx> [--jit]
 ```
 
-**C:**
-```c
-#include "parser.h"
-#include "tokenizer.h"
+- `<file.addx>`: Path to the source file to compile and run
+- `--jit`: Optional flag to use the JIT compiler instead of the VM interpreter
 
-const char* source = "def main() -> int {\n    print(\"Hello from AddX!\")\n    return 0\n}";
+## Language Reference
 
-// Tokenize once
-Tokens tokens = tokenize(source);
+### Syntax Overview
 
-// Parse multiple times without re-tokenizing
-ASTNode* ast1 = parse_source(source, &tokens);
-ASTNode* ast2 = parse_source(source, &tokens);  // No re-tokenization occurs
+AddX uses indentation to define blocks (similar to Python). Statements are separated by newlines.
 
-// Remember to free tokens when done
-free_tokens(&tokens);
+```addx
+# This is a comment
+def main():
+    x = 42
+    if x > 0:
+        print("Positive")
+    else:
+        print("Non-positive")
 ```
 
-## Language Features
+### Data Types
 
-- Python-like syntax with optional type annotations
-- Manual memory management (new/delete)
-- Pointers and references
-- Control flow (if/else, for, while)
-- Functions with type annotations
-- Classes and object-oriented programming
-- Data structures (lists, dictionaries)
-- Namespaces
-- Basic exception handling
+- **Numbers**: `42`, `3.14` (stored as double precision floats)
+- **Strings**: `"hello"`, `'world'`
+- **Booleans**: `True`, `False`
+- **None**: `None` (null value)
+- **Lists**: `[1, 2, 3]`
+
+### Variables
+
+Variables are dynamically typed but declarations can include type annotations:
+
+```addx
+x: int = 10          # Explicit type declaration
+y = "hello"          # Type inferred
+```
+
+### Functions
+
+```addx
+def factorial(n: int) -> int:
+    if n <= 1:
+        return 1
+    return n * factorial(n - 1)
+
+def main():
+    print(factorial(5))  # Outputs: 120
+```
+
+### Control Flow
+
+```addx
+# If statement
+if condition:
+    # then branch
+else:
+    # else branch
+
+# While loop
+while condition:
+    # loop body
+
+# For loop (with range)
+for i in range(10):
+    print(i)
+
+# For loop (with explicit start/end/step)
+for i in range(0, 20, 2):
+    print(i)  # 0, 2, 4, ..., 18
+```
+
+### Lists
+
+```addx
+numbers = [1, 2, 3, 4, 5]
+numbers[0] = 10          # List element assignment
+first = numbers[0]       # List element access
+length = len(numbers)    # Using sizeof on list variable
+```
+
+### Pointer Operations (Advanced)
+
+```addx
+x: int = 42
+ptr: int* = &x           # Address-of operator
+value: int = *ptr        # Dereference operator
+size: int = sizeof(int)  # Size of type
+```
+
+### Classes
+
+```addx
+class Point:
+    x: float
+    y: float
+    
+    def init(self, x_val: float, y_val: float):
+        self.x = x_val
+        self.y = y_val
+    
+    def distance(self) -> float:
+        return (self.x * self.x + self.y * self.y) ** 0.5
+
+def main():
+    p = Point()
+    p.init(3.0, 4.0)
+    print(p.distance())  # Outputs: 5.0
+```
+
+### Memory Management
+
+```addx
+buffer: int* = new int[10]  # Allocate array of 10 integers
+# ... use buffer ...
+delete buffer               # Free memory
+```
 
 ## Examples
 
-See the `.addx` files in the project root for complete examples:
-- `hello.addx` - Classic "Hello, World!"
-- `sample.addx` - More complex example
-- `test_*.addx` - Various test cases demonstrating language features
+### Hello World (`hello.addx`)
 
-## Building and Testing
-
-### Python Testing
-```bash
-python test_runner.py hello.addx
+```addx
+def main():
+    print("Hello, World!")
 ```
 
-### C Testing (Windows/MSVC)
+Run:
 ```bash
-cd c
-cl /nologo /W4 tokenizer.c parser.c ast.c avm.c test_parse_source.c /Fe:test_parse_source.exe
-test_parse_source.exe
+AddX.exe hello.addx
 ```
+
+### Fibonacci (`fib.addx`)
+
+```addx
+def fib(n: int) -> int:
+    if n <= 1:
+        return n
+    return fib(n - 1) + fib(n - 2)
+
+def main():
+    for i in range(10):
+        print(fib(i))
+```
+
+Run:
+```bash
+AddX.exe fib.addx --jit
+```
+
+## Extending the Language
+
+### Adding New Features
+
+1. **Parser (`fast_parse.c`)**:
+   - Add new AST node types in `fast_parse.h`
+   - Implement parsing functions for new constructs
+   - Update `parse_block` or expression parsers as needed
+
+2. **Compiler (`compiler.c`)**:
+   - Add new OpCode values in `compiler.h` if needed
+   - Implement compilation logic in `compile_expression` or `compile_node`
+   - Handle any new data types or operations
+
+3. **VM (`vm.c`)**:
+   - Add case statements for new opcodes in the `switch` in `run_vm`
+   - Implement the behavior for each new opcode
+
+4. **JIT (`jit.c`)**:
+   - Add emission functions for new opcodes
+   - Update the `switch` statement in `jit_compile`
+   - Ensure proper register usage and calling conventions
+
+### Testing Changes
+
+After modifications:
+1. Rebuild the project
+2. Test with existing examples to ensure no regressions
+3. Create test cases for new features
+4. Verify both VM and JIT modes produce identical results
+
+## Troubleshooting
+
+### Common Issues
+
+- **"undefined reference" errors**: Ensure all `.c` files are included in the build
+- **JIT compilation fails**: The JIT component is Windows-specific and requires executable memory allocation
+- **Stack overflow in recursion**: The VM has limited stack size; consider iterative solutions for deep recursion
+- **Type mismatches**: The language is dynamically typed but the VM expects numeric values for arithmetic operations
+
+### Debugging
+
+- Build with `-g` flag for debug symbols
+- Use `printf` statements strategically in the parser/compiler/VMI
+- Check generated bytecode by adding debug output in compiler
+- For JIT issues, verify memory protection settings work on your Windows version
 
 ## License
 
-[License information would go here]
+This project is provided for educational purposes. See individual file headers for specific licensing information.
 
-## Acknowledgments
+---
 
-- Inspired by Python's readability
-- Performance considerations from C++
-- Community contributions and feedback
-
---- 
-
-*Last updated: $(Get-Date -Format yyyy-MM-dd)*
+*Happy coding with AddX!*
