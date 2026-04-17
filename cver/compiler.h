@@ -41,6 +41,7 @@ typedef enum {
     OP_ADDRESS_OF,
     OP_DEREFERENCE,
     OP_SIZEOF,
+    OP_IMPORT,
     OP_HALT
 } OpCode;
 

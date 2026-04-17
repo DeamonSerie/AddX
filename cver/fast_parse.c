@@ -387,6 +387,25 @@ static ASTNode* parse_print() {
     return alloc_node(AST_PRINT, d);
 }
 
+static ASTNode* parse_import() {
+    pos += 6;
+    skip_ws();
+    
+#if DEBUG_PARSE
+    printf("[IMPORT] module name starts pos=%zu\n", pos);
+#endif
+    
+    const char* name = read_ident();
+    
+#if DEBUG_PARSE
+    printf("[IMPORT] module=%s\n", name);
+#endif
+    
+    ImportData* d = malloc(sizeof(ImportData));
+    d->module_name = (char*)name;
+    return alloc_node(AST_IMPORT, d);
+}
+
 static ASTNode* parse_primary() {
     if (pos >= src_len) return NULL;
     char c = src[pos];
@@ -628,6 +647,7 @@ static ASTNode** parse_block(size_t* out_count, int brace) {
         if (match_kw("for")) { ASTNode* f = parse_for(); body[count++] = f; skip_ws(); continue; }
         if (match_kw("return")) { ASTNode* f = parse_return(); body[count++] = f; skip_ws(); continue; }
         if (match_kw("print")) { ASTNode* f = parse_print(); body[count++] = f; skip_ws(); continue; }
+        if (match_kw("import")) { ASTNode* f = parse_import(); body[count++] = f; skip_ws(); continue; }
         
         ASTNode* st = parse_exp();
         if (st) {
@@ -665,6 +685,28 @@ ASTNode* fast_parse(const char* source) {
     data->count = body_count;
     
     return alloc_node(AST_PROGRAM, data);
+}
+
+ASTNode* fast_parse_file(const char* filename) {
+    FILE* f = fopen(filename, "r");
+    if (!f) {
+        fprintf(stderr, "Cannot open file: %s\n", filename);
+        return NULL;
+    }
+    
+    fseek(f, 0, SEEK_END);
+    long size = ftell(f);
+    fseek(f, 0, SEEK_SET);
+    
+    char* source = malloc(size + 1);
+    fread(source, 1, size, f);
+    source[size] = '\0';
+    fclose(f);
+    
+    ASTNode* ast = fast_parse(source);
+    free(source);
+    
+    return ast;
 }
 
 void fast_free(ASTNode* ast) {

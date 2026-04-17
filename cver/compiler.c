@@ -11,6 +11,8 @@ typedef struct {
     size_t local_count;
     char** global_vars;
     size_t global_count;
+    char** imported_modules;
+    size_t imported_count;
 } Compiler;
 
 static int is_local(Compiler* c, const char* name) {
@@ -374,6 +376,13 @@ static void compile_node(Compiler* c, ASTNode* node) {
         case AST_CONST: {
             ConstData* d = node->data;
             compile_const(c, d);
+            break;
+        }
+        case AST_IMPORT: {
+            ImportData* d = node->data;
+            if (d && d->module_name) {
+                printf("[COMPILE] Importing module: %s\n", d->module_name);
+            }
             break;
         }
         default:

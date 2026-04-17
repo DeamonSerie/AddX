@@ -10,7 +10,7 @@ typedef enum {
     AST_NONE, AST_IDENTIFIER, AST_LIST, AST_INDEX_ACCESS,
     AST_ATTRIBUTE_ACCESS, AST_CALL, AST_BREAK, AST_CONTINUE,
     AST_NULLPTR, AST_ADDRESS_OF, AST_DEREFERENCE, AST_SIZEOF,
-    AST_STATIC_VAR, AST_CONST, AST_NEW, AST_DELETE
+    AST_STATIC_VAR, AST_CONST, AST_NEW, AST_DELETE, AST_IMPORT
 } ASTNodeType;
 
 typedef struct ASTNode {
@@ -91,8 +91,10 @@ typedef struct { char* name; char* var_type; ASTNode* value; } StaticVarData;
 typedef struct { char* name; char* var_type; ASTNode* value; } ConstData;
 typedef struct { char* type_name; ASTNode** args; size_t arg_count; } NewData;
 typedef struct { ASTNode* expr; } DeleteData;
+typedef struct { char* module_name; } ImportData;
 
 ASTNode* fast_parse(const char* source);
+ASTNode* fast_parse_file(const char* filename);
 void fast_free(ASTNode* ast);
 
 #endif
