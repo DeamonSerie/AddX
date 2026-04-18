@@ -2,6 +2,28 @@
 
 AddX is a programming language with both a virtual machine (VM) interpreter and a Just-In-Time (JIT) compiler targeting x64 Windows. This guide explains how to build, use, and extend the AddX system.
 
+### AddX Standard Libraries (.addx files)
+
+| File | Description |
+|------|-------------|
+| `Crypto.addx` | Encryption, hashing (AES, RSA, MD5, SHA, BLAKE2) |
+| `Integer.addx` | BigInt, bit operations, number theory |
+| `String.addx` | Python-like string functions |
+| `PyCompat.addx` | Python-compatible functions (list, dict, range) |
+| `Assembler.addx` | AddX assembler interface |
+| `Tokenizer.addx` | Lexical analysis, tokenization |
+| `DatabaseExt.addx` | Custom database handler system |
+| `Assembly.addx` | AddX VM assembly definitions |
+| `NeuralNetwork.addx` | Neural networks, activation functions, optimizers |
+
+### Root AddX Libraries
+
+| File | Description |
+|------|-------------|
+| `math.addx` | Mathematical functions (trig, log, sqrt, random) |
+| `vector.addx` | 2D/3D vector math, colors, shaders |
+| `Visualization.addx` | Charts and graphs rendering |
+
 ## Features
 
 - **Parsing**: Indentation-based syntax (similar to Python)

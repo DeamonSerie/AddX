@@ -1,0 +1,248 @@
+# Math Namespace for AddX
+# Provides complex mathematical operations and functions
+
+class Math:
+    # Basic Constants
+    PI = 3.141592653589793
+    E = 2.718281828459045
+    TAU = 6.283185307179586  # 2 * PI
+    
+    # Square Roots
+    SQRT2 = 1.414213562373095
+    SQRT3 = 1.732050807568877
+    SQRT_PI = 1.772453850905516
+    SQRT_E = 1.648721270700128
+    
+    # Logarithms
+    LN2 = 0.693147180559945
+    LN10 = 2.302585092994046
+    LOG2E = 1.442695040889
+    LOG10E = 0.434294481903252
+    
+    # Golden Ratio
+    PHI = 1.618033988749895
+    PHI_INV = 0.618033988749895
+    
+    # Other Constants
+    INFINITY = 999999999999.0
+    NAN = 0.0 / 0.0
+    EPSILON = 1e-15
+    
+    # Conversions
+    DEG_TO_RAD = 0.017453292519943
+    RAD_TO_DEG = 57.29577951308232
+    
+    # Trigonometric functions (using Taylor series approximations)
+    def sin(x: float) -> float:
+        
+        # Reduce x to range [-pi, pi] for better convergence
+        x = x % (2 * Math.PI)
+        if x > Math.PI:
+            x = x - 2 * Math.PI
+        elif x < -Math.PI:
+            x = x + 2 * Math.PI
+            
+        # Taylor series: sin(x) = x - x^3/3! + x^5/5! - x^7/7! + ...
+        result = 0.0
+        term = x
+        n = 1
+        while abs(term) > 0.00001:  # Continue until term is very small
+            result = result + term
+            n = n + 2
+            term = -term * x * x / (n * (n - 1))
+        return result
+    
+    def cos(x: float) -> float:
+        # Calculate cosine of x (in radians) using Taylor series
+        # cos(x) = sin(x + Math.PI/2)
+        return Math.sin(x + Math.PI / 2)
+    
+    def tan(x: float) -> float:
+        
+        cos_x = Math.cos(x)
+        if abs(cos_x) < 0.00001:  # Avoid division by zero
+            return float('inf') if Math.sin(x) >= 0 else float('-inf')
+        return Math.sin(x) / cos_x
+    
+    # Inverse trigonometric functions
+    def asin(x: float) -> float:
+        # Calculate arcsine of x using Taylor series
+        if abs(x) > 1:
+            return None  # Undefined
+        # Use Taylor series for arcsin
+        result = x
+        term = x
+        n = 1
+        while abs(term) > 0.00001:
+            term = term * x * x * (2 * n - 1) * (2 * n - 1) / (2 * n * (2 * n + 1))
+            result = result + term
+            n = n + 1
+        return result
+    
+    def acos(x: float) -> float:
+        
+        if abs(x) > 1:
+            return None  # Undefined
+        return Math.PI / 2 - Math.asin(x)
+    
+    def atan(x: float) -> float:
+        # Calculate arctangent of x using Taylor series
+        if abs(x) > 1:
+            # Use identity: atan(x) = Math.PI/2 - atan(1/x) for x > 1
+            if x > 0:
+                return Math.PI / 2 - Math.atan(1 / x)
+            else:
+                return -Math.PI / 2 - Math.atan(1 / x)
+        
+        # Taylor series: atan(x) = x - x^3/3 + x^5/5 - x^7/7 + ...
+        result = 0.0
+        term = x
+        n = 1
+        while abs(term) > 0.00001:
+            result = result + term
+            n = n + 2
+            term = -term * x * x * (n - 2) / n
+        return result
+    
+    # Exponential and logarithmic functions
+    def exp(x: float) -> float:
+        # Calculate e^x using Taylor series
+        # Taylor series: e^x = 1 + x + x^2/2! + x^3/3! + ...
+        result = 1.0
+        term = 1.0
+        n = 1
+        while abs(term) > 0.00001:
+            term = term * x / n
+            result = result + term
+            n = n + 1
+        return result
+    
+    def log(x: float) -> float:
+        # Calculate natural logarithm of x
+        if x <= 0:
+            return None  # Undefined for non-positive numbers
+        # Use series expansion for ln(x) = 2 * sum_{n=0}^∞ [((x-1)/(x+1))^(2n+1) / (2n+1)]
+        y = (x - 1) / (x + 1)
+        result = 0.0
+        term = y
+        n = 0
+        while abs(term) > 0.00001:
+            result = result + term
+            n = n + 1
+            term = term * y * y * (2 * n - 1) / (2 * n + 1)
+        return 2 * result
+    
+    def log10(x: float) -> float:
+        # Calculate base-10 logarithm of x
+        ln_x = Math.log(x)
+        if ln_x is None:
+            return None
+        return ln_x / Math.log(10)
+    
+    # Power and root functions
+    def pow(x: float, y: float) -> float:
+        # Calculate x^y
+        if x == 0:
+            if y <= 0:
+                return None  # Undefined
+            return 0.0
+        if x < 0 and not Math.is_Int(y):
+            return None  # Complex result for negative base with non-integer exponent
+        return Math.exp(y * Math.log(abs(x))) * (1 if (x >= 0 or Math.is_integer(y)) else -1)
+    
+    def sqrt(x: float) -> float:
+        # Calculate square root of x
+        if x < 0:
+            return None  # Complex result
+        if x == 0:
+            return 0.0
+        # Use Newton's method
+        guess = x / 2.0
+        while True:
+            new_guess = (guess + x / guess) / 2.0
+            if abs(new_guess - guess) < 0.00001:
+                return new_guess
+            guess = new_guess
+    
+    # Helper functions
+    def is_integer(x: float) -> bool:
+        # Check if x is an integer (within floating point precision)
+        return abs(x - round(x)) < 1e-15
+    
+    def abs(x: float) -> float:
+        # Calculate absolute value of x
+        return x if x >= 0 else -x
+    
+    # Random function (simple implementation)
+    def random() -> float:
+        # Simple pseudo-random using time-based seed
+        # In production, use Crypto.randomFloat()
+        import time
+        seed = time.time()
+        return (seed * 1103515245 + 12345) % 2147483648 / 2147483648.0
+    
+    def randint(minVal: int, maxVal: int) -> int
+        return toInt(this.random() * (maxVal - minVal + 1)) + minVal
+    
+    # Factorial and combinatorics
+    def factorial(n: int) -> int:
+        # Calculate factorial of n (n!)
+        if n < 0:
+            return None  # Undefined for negative numbers
+        if n == 0 or n == 1:
+            return 1
+        result = 1
+        i = 2
+        while i <= n:
+            result = result * i
+            i = i + 1
+        return result
+    
+    def combination(n: int, k: int) -> float:
+        # Calculate combination C(n,k) = n! / (k! * (n-k)!)
+        if n < 0 or k < 0 or k > n:
+            return None
+        if k > n - k:  # Take advantage of symmetry
+            k = n - k
+        result = 1
+        i = 1
+        while i <= k:
+            result = result * (n - k + i) / i
+            i = i + 1
+        return result
+    
+    def permutation(n: int, k: int) -> float:
+        # Calculate permutation P(n,k) = n! / (n-k)!
+        if n < 0 or k < 0 or k > n:
+            return None
+        result = 1
+        i = 0
+        while i < k:
+            result = result * (n - i)
+            i = i + 1
+        return result
+
+# Example usage when file is run directly
+def main():
+    print("Math Namespace Demo:")
+    print("PI =", Math.PI)
+    print("E =", Math.E)
+    print()
+    print("Trigonometric Functions:")
+    print("sin(0) =", Math.sin(0))
+    print("sin(PI/2) =", Math.sin(Math.PI / 2))
+    print("cos(0) =", Math.cos(0))
+    print("cos(PI) =", Math.cos(Math.PI))
+    print("tan(PI/4) =", Math.tan(Math.PI / 4))
+    print()
+    print("Exponential and Logarithmic:")
+    print("exp(0) =", Math.exp(0))
+    print("exp(1) =", Math.exp(1))
+    print("log(1) =", Math.log(1))
+    print("log(E) =", Math.log(Math.E))
+    print("log10(100) =", Math.log10(100))
+    print()
+    print("Power and Root:")
+    print("pow(2, 3) =", Math.pow(2, 3))
+    print("sqrt(16) =", Math.sqrt(16))
+    print("sqrt(2) =", Math.sqrt(2))

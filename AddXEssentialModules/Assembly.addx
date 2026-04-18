@@ -1,0 +1,633 @@
+# AddX Assembly Language
+# Low-level assembly programming for AddX VMs
+
+# === Assembly ===
+
+# =============================================================================
+# REGISTER DEFINITIONS
+# =============================================================================
+
+#General purpose registers (32-bit)
+REG_RAX: int = 0   # Return value / accumulator
+REG_RCX: int = 1   # Counter / loop
+REG_RDX: int = 2   # Data / dividend
+REG_RBX: int = 3   # Base
+REG_RSP: int = 4   # Stack pointer
+REG_RBP: int = 5   # Base pointer
+REG_RSI: int = 6   # Source index
+REG_RDI: int = 7   # Destination index
+
+# Extended registers (64-bit)
+REG_R8: int = 8
+REG_R9: int = 9
+REG_R10: int = 10
+REG_R11: int = 11
+REG_R12: int = 12
+REG_R13: int = 13
+REG_R14: int = 14
+REG_R15: int = 15
+
+# Special registers
+REG_PC: int = 255  # Program counter
+REG_ZF: int = 256  # Zero flag
+REG_SF: int = 257  # Sign flag
+REG_OF: int = 258  # Overflow flag
+REG_CF: int = 259  # Carry flag
+
+# =============================================================================
+# INSTRUCTION DEFINITIONS
+# =============================================================================
+
+# Data transfer instructions
+def MOV(dst: Reg, src: Reg | Imm | Mem)
+    # Move: dst = src
+    pass
+
+def MOVI(dst: Reg, imm: Imm)
+    # Move immediate: dst = imm
+    pass
+
+def MOVL(dst: Reg, label: Label)
+    # Move label address: dst = &label
+    pass
+
+def MOVB(dst: Reg, src: Reg | Mem)
+    # Move byte (8-bit)
+    pass
+
+def MOVW(dst: Reg, src: Reg | Mem)
+    # Move word (16-bit)
+    pass
+
+def MOVD(dst: Reg, src: Reg | Mem)
+    # Move doubleword (32-bit)
+    pass
+
+def MOVQ(dst: Reg, src: Reg | Mem)
+    # Move quadword (64-bit)
+    pass
+
+def LEA(dst: Reg, src: Mem)
+    # Load effective address: dst = &src
+    pass
+
+def POP(reg: Reg)
+    # Pop from stack: reg = [SP]; SP += 4
+    pass
+
+def PUSH(reg: Reg | Imm)
+    # Push to stack: SP -= 4; [SP] = reg
+    pass
+
+def POPF()
+    # Pop flags from stack
+    pass
+
+def PUSHF()
+    # Push flags to stack
+    pass
+
+def IN(reg: Reg, port: Imm)
+    # Input from port
+    pass
+
+def OUT(port: Imm, reg: Reg)
+    # Output to port
+    pass
+
+# =============================================================================
+# ARITHMETIC INSTRUCTIONS
+# =============================================================================
+
+def ADD(dst: Reg, src: Reg | Imm | Mem)
+    # Add: dst = dst + src
+    pass
+
+def ADC(dst: Reg, src: Reg | Imm | Mem)
+    # Add with carry: dst = dst + src + CF
+    pass
+
+def SUB(dst: Reg, src: Reg | Imm | Mem)
+    # Subtract: dst = dst - src
+    pass
+
+def SBB(dst: Reg, src: Reg | Imm | Mem)
+    # Subtract with borrow: dst = dst - src - CF
+    pass
+
+def MUL(src: Reg | Mem)
+    # Unsigned multiply: RAX = RAX * src
+    pass
+
+def IMUL(src: Reg | Mem)
+    # Signed multiply: RAX = RAX * src
+    pass
+
+def IMUL(dst: Reg, src: Reg | Imm)
+    # Signed multiply: dst = dst * src
+    pass
+
+def DIV(src: Reg | Mem)
+    # Unsigned divide: RAX = RAX / src, RDX = RAX % src
+    pass
+
+def IDIV(src: Reg | Mem)
+    # Signed divide: RAX = RAX / src, RDX = RAX % src
+    pass
+
+def NEG(reg: Reg | Mem)
+    # Negate: reg = -reg
+    pass
+
+def INC(reg: Reg | Mem)
+    # Increment: reg = reg + 1
+    pass
+
+def DEC(reg: Reg | Mem)
+    # Decrement: reg = reg - 1
+    pass
+
+def CMP(left: Reg | Imm, right: Reg | Mem)
+    # Compare: left - right (sets flags)
+    pass
+
+def TEST(left: Reg | Imm, right: Reg | Imm)
+    # Test: left AND right (sets flags, no result)
+    pass
+
+# =============================================================================
+# LOGIC INSTRUCTIONS
+# =============================================================================
+
+def AND(dst: Reg, src: Reg | Imm | Mem)
+    # Logical AND: dst = dst & src
+    pass
+
+def OR(dst: Reg, src: Reg | Imm | Mem)
+    # Logical OR: dst = dst | src
+    pass
+
+def XOR(dst: Reg, src: Reg | Imm | Mem)
+    # Logical XOR: dst = dst ^ src
+    pass
+
+def NOT(reg: Reg | Mem)
+    # Logical NOT: reg = ~reg
+    pass
+
+# =============================================================================
+# SHIFT INSTRUCTIONS
+# =============================================================================
+
+def SHL(reg: Reg | Mem, amount: Reg | Imm)
+    # Shift left: reg = reg << amount
+    pass
+
+def SHR(reg: Reg | Mem, amount: Reg | Imm)
+    # Shift right unsigned: reg = reg >> amount (logical)
+    pass
+
+def SAR(reg: Reg | Mem, amount: Reg | Imm)
+    # Shift right signed: reg = reg >> amount (arithmetic)
+    pass
+
+def ROL(reg: Reg | Mem, amount: Reg | Imm)
+    # Rotate left
+    pass
+
+def ROR(reg: Reg | Mem, amount: Reg | Imm)
+    # Rotate right
+    pass
+
+def RCL(reg: Reg | Mem, amount: Reg | Imm)
+    # Rotate through carry left
+    pass
+
+def RCR(reg: Reg | Mem, amount: Reg | Imm)
+    # Rotate through carry right
+    pass
+
+# =============================================================================
+# CONTROL FLOW INSTRUCTIONS
+# =============================================================================
+
+def JMP(target: Label | Imm | Reg)
+    # Unconditional jump
+    pass
+
+def JZ(target: Label)
+    # Jump if zero (ZF = 1)
+    pass
+
+def JNZ(target: Label)
+    # Jump if not zero (ZF = 0)
+    pass
+
+def JS(target: Label)
+    # Jump if sign (SF = 1)
+    pass
+
+def JNS(target: Label)
+    # Jump if not sign (SF = 0)
+    pass
+
+def JO(target: Label)
+    # Jump if overflow (OF = 1)
+    pass
+
+def JNO(target: Label)
+    # Jump if not overflow (OF = 0)
+    pass
+
+def JC(target: Label)
+    # Jump if carry (CF = 1)
+    pass
+
+def JNC(target: Label)
+    # Jump if not carry (CF = 0)
+    pass
+
+def JA(target: Label)
+    # Jump if above (unsigned): CF = 0 and ZF = 0
+    pass
+
+def JAE(target: Label)
+    # Jump if above or equal (unsigned): CF = 0
+    pass
+
+def JB(target: Label)
+    # Jump if below (unsigned): CF = 1
+    pass
+
+def JBE(target: Label)
+    # Jump if below or equal (unsigned): CF = 1 or ZF = 1
+    pass
+
+def JG(target: Label)
+    # Jump if greater (signed): ZF = 0 and SF = OF
+    pass
+
+def JGE(target: Label)
+    # Jump if greater or equal (signed): SF = OF
+    pass
+
+def JL(target: Label)
+    # Jump if less (signed): SF != OF
+    pass
+
+def JLE(target: Label)
+    # Jump if less or equal (signed): ZF = 1 or SF != OF
+    pass
+
+def CALL(target: Label | Reg | Imm)
+    # Call procedure: PUSH(PC); JMP(target)
+    pass
+
+def RET()
+    # Return from procedure: POP(PC)
+    pass
+
+def RETI(immediate: Imm)
+    # Return from interrupt
+    pass
+
+def LOOP(counter: Reg, target: Label)
+    # Decrement counter; jump if not zero
+    pass
+
+def LOOPE(target: Label)
+    # Loop while equal (ZF = 1 and CX != 0)
+    pass
+
+def LOOPNE(target: Label)
+    # Loop while not equal (ZF = 0 and CX != 0)
+    pass
+
+# =============================================================================
+# STRING INSTRUCTIONS
+# =============================================================================
+
+def MOVS(down: Imm)
+    # Move string: [EDI] = [ESI]; ESI += down; EDI += down
+    pass
+
+def CMPS(down: Imm)
+    # Compare string: [ESI] - [EDI]; ESI += down; EDI += down
+    pass
+
+def SCAS(reg: Reg)
+    # Scan string: [EDI] - reg; EDI += down
+    pass
+
+def LODS(reg: Reg)
+    # Load string: reg = [ESI]; ESI += down
+    pass
+
+def STOS(reg: Reg)
+    # Store string: [EDI] = reg; EDI += down
+    pass
+
+def REP()
+    # Repeat while CX != 0: rep instruction
+    pass
+
+def REPE()
+    # Repeat while equal: repz instruction
+    pass
+
+def REPNE()
+    # Repeat while not equal: repnz instruction
+    pass
+
+# =============================================================================
+# FLAG INSTRUCTIONS
+# =============================================================================
+
+def STC()
+    # Set carry flag: CF = 1
+    pass
+
+def CLC()
+    # Clear carry flag: CF = 0
+    pass
+
+def CMC()
+    # Complement carry flag: CF = ~CF
+    pass
+
+def STD()
+    # Set direction flag: DF = 1 (auto-decrement)
+    pass
+
+def CLD()
+    # Clear direction flag: DF = 0 (auto-increment)
+    pass
+
+def STI()
+    # Set interrupt flag: IF = 1
+    pass
+
+def CLI()
+    # Clear interrupt flag: IF = 0
+    pass
+
+def SAHF()
+    # Store AH into flags
+    pass
+
+def LAHF()
+    # Load flags into AH
+    pass
+
+# =============================================================================
+# MISCELLANEOUS INSTRUCTIONS
+# =============================================================================
+
+def NOP()
+    # No operation
+    pass
+
+def HLT()
+    # Halt processor
+    pass
+
+def WAIT()
+    # Wait for FPU
+    pass
+
+def CPUID()
+    # CPU identification
+    pass
+
+def RDTSC()
+    # Read time stamp counter
+    pass
+
+def INVD()
+    # Invalidate data cache
+    pass
+
+def WBINVD()
+    # Write back and invalidate data cache
+    pass
+
+def RDMSR()
+    # Read model-specific register
+    pass
+
+def WRMSR()
+    # Write model-specific register
+    pass
+
+def PREFETCH(memory: Mem)
+    # Prefetch to cache
+    pass
+
+# =============================================================================
+# VM INSTRUCTIONS (Virtual Machine)
+# =============================================================================
+
+def VMREAD(reg: Reg, src: Reg | Mem, immediate: Imm)
+    # Read from VM register or memory
+    pass
+
+def VMWRITE(dst: Reg | Mem, src: Reg, immediate: Imm)
+    # Write to VM register or memory
+    pass
+
+def VMCALL(immediate: Imm)
+    # VM hypercall
+    pass
+
+# =============================================================================
+# PSEUDO INSTRUCTIONS
+# =============================================================================
+
+def EQU(value: Imm): Label
+    pass
+
+def DB(value: Imm | string | Char): Label
+    # Define byte(s)
+    pass
+
+def DW(value: Imm): Label
+    # Define word (16-bit)
+    pass
+
+def DD(value: Imm | Label): Label
+    # Define doubleword (32-bit)
+    pass
+
+def DQ(value: Imm | Label): Label
+    # Define quadword (64-bit)
+    pass
+
+def RESB(amount: Imm): Label
+    # Reserve bytes
+    pass
+
+def RESW(amount: Imm): Label
+    # Reserve words
+    pass
+
+def RESD(amount: Imm): Label
+    # Reserve doublewords
+    pass
+
+def RESQ(amount: Imm): Label
+    # Reserve quadwords
+    pass
+
+def TIMES(count: Imm, instruction: Instruction)
+    # Repeat instruction count times
+    pass
+
+def SEGMENT(name: string)
+    # Define segment
+    pass
+
+def ORG(address: Imm)
+    # Set origin address
+    pass
+
+# =============================================================================
+# ASSEMBLY DIRECTIVES
+# =============================================================================
+
+def SECTION(name: string)
+    # Define section
+    pass
+
+def GLOBAL(symbol: Label)
+    # Export symbol
+    pass
+
+def EXTERN(symbol: Label)
+    # Import symbol
+    pass
+
+def ENTRY(symbol: Label)
+    # Set entry point
+    pass
+
+def ALIGN(value: Imm)
+    # Align to value
+    pass
+
+def FILL(value: Imm, amount: Imm)
+    # Fill with value
+    pass
+
+def INCBIN(path: string)
+    # Include binary file
+    pass
+
+def INCLUDE(path: string)
+    # Include assembly file
+    pass
+
+# =============================================================================
+# MACROS
+# =============================================================================
+
+def PUSHAD()
+    # Push all general registers
+    "push rax; push rcx; push rdx; push rbx; push rsp; push rbp; push rsi; push rdi"
+
+def POPAD()
+    # Pop all general registers
+    "pop rdi; pop rsi; pop rbp; pop rsp; pop rbx; pop rdx; pop rcx; pop rax"
+
+def PUSHFD()
+    # Push all flags
+    "pushf"
+
+def POPFD()
+    # Pop all flags  
+    "popf"
+
+def ENTER(size: Imm, nesting: Imm)
+    # Enter procedure (setup stack frame)
+    "push rbp; mov rbp, rsp; sub rsp, size"
+
+def LEAVE()
+    # Leave procedure (restore stack frame)
+    "mov rsp, rbp; pop rbp"
+
+def CALL(label: Label)
+    "push pc; jmp label"
+
+def PUSHIMM(imm: Imm)
+    "mov rax, imm; push rax"
+
+def JMP_SHORT(label: Label)
+    "jmp short label"
+
+def JMP_NEAR(label: Label)
+    "jmp near label"
+
+# =============================================================================
+# EXAMPLE PROGRAMS
+# =============================================================================
+
+def exampleAdd()
+    # Simple addition example
+    labels:
+        start
+    
+    main:
+        MOVI(RAX, 5)
+        MOVI(RCX, 3)
+        ADD(RAX, RCX)
+        RET
+
+def exampleLoop()
+    # Loop counting down
+    labels:
+        start
+    
+    main:
+        MOVI(RAX, 10)
+        MOVI(RCX, 0)
+    
+    loop:
+        INC(RCX)
+        DEC(RAX)
+        JNZ(loop)
+        RET
+
+def exampleFunctionCall()
+    # Function call example
+    labels:
+        main
+        add_numbers
+    
+    main:
+        CALL(add_numbers)
+        RET
+    
+    add_numbers:
+        ENTER(0, 0)
+        PUSHIMM(5)
+        POP(RAX)
+        ADD(RAX, 3)
+        LEAVE()
+        RET
+
+def exampleConditional()
+    # Conditional example
+    labels:
+        main
+    
+    main:
+        MOVI(RAX, 10)
+        CMP(RAX, 5)
+        JA(greater)
+        MOVI(RAX, 0)
+        JMP(done)
+    
+    greater:
+        MOVI(RAX, 1)
+    
+    done:
+        RET

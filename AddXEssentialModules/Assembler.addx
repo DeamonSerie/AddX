@@ -1,0 +1,187 @@
+# AddX Assembly Module
+# Provides AddX interface to the assembler
+
+import String
+
+# === Assembler ===
+
+def assemble(source: string, output: string) -> bool
+    return asm_assemble(source, output)
+
+def assembleFile(inputPath: string, outputPath: string) -> bool
+    result = asm_main(2, ["asm", inputPath, outputPath])
+    return result == 0
+
+def assembleToBinary(source: string, output: string) -> bool
+    return asm_to_binary(source, output)
+
+def assembleToHex(source: string, output: string) -> bool
+    return asm_to_hex(source, output)
+
+def assembleWithOptions(source: string, output: string, verbose: bool, useLabels: bool) -> bool
+    return asm_advanced(source, output, verbose, useLabels)
+
+def getAssemblerVersion() -> string
+    return "AddX Assembler v1.0"
+
+def listSupportedOpcodes() -> list<string>
+    opcodes = [
+        "NOP", "MOV", "MOVI", "MOVL", "MOVH",
+        "ADD", "ADDI", "SUB", "SUBI", "MUL", "MULI",
+        "DIV", "DIVI", "MOD", "MODI",
+        "AND", "ANDI", "OR", "ORI", "XOR", "XORI", "NOT",
+        "SHL", "SHR", "SAR", "ROL", "ROR",
+        "CMP", "CMPI", "TEST", "TESTI",
+        "JE", "JNE", "JG", "JGE", "JL", "JLE", "JA", "JB",
+        "JMP", "CALL", "RET", "JMPF", "CALLF",
+        "PUSH", "POP", "PUSHF", "POPF",
+        "LOAD", "STORE", "LOADB", "STOREB", "LOADW", "STOREW",
+        "LOADI", "STOREI",
+        "HLT", "INT", "IRET", "NMI"
+    ]
+    return opcodes
+
+def listSupportedRegisters() -> list<string>
+    regs = [
+        "R0", "R1", "R2", "R3", "R4", "R5", "R6", "R7",
+        "R8", "R9", "R10", "R11", "R12", "R13", "R14", "R15",
+        "SP", "BP", "IP", "FLAGS",
+        "X0", "X1", "X2", "X3", "X4", "X5", "X6", "X7"
+    ]
+    return regs
+
+# === Assembly Helpers ===
+
+def validateAssembly(source: string) -> tuple<bool, list<string>>
+    errors = []
+    
+    lines = source.split("\n")
+    for i in range(len(lines)) do
+        line = lines[i].trim()
+        
+        if line.startsWith(";") or line == "" then
+            continue
+        
+        if line.contains(":") then
+            parts = line.split(":")
+            label = parts[0].trim()
+            if not label.isValidLabel() then
+                errors.append("Line " + str(i + 1) + ": Invalid label '" + label + "'")
+        
+        if line.contains("[") and not line.contains("]") then
+            errors.append("Line " + str(i + 1) + ": Unclosed bracket")
+    
+    return (len(errors) == 0, errors)
+
+def formatAssembly(source: string) -> string
+    lines = source.split("\n")
+    formatted = ""
+    
+    for line in lines do
+        line = line.trim()
+        
+        if line.startsWith(";") then
+            formatted = formatted + "; " + line.substring(1).trim() + "\n"
+        elif line == "" then
+            formatted = formatted + "\n"
+        elif line.contains(":") then
+            parts = line.split(":")
+            label = parts[0].trim()
+            formatted = formatted + label + ":\n"
+            if len(parts) > 1 and parts[1].trim() != "" then
+                formatted = formatted + "    " + parts[1].trim() + "\n"
+        else
+            formatted = formatted + "    " + line + "\n"
+    
+    return formatted
+
+# === Example Programs ===
+
+def getHelloWorldProgram() -> string
+    program = "
+; AddX Hello World Program
+
+        ORG 0x1000
+        
+        MOVI R1, hello_str
+        MOVI R2, 0
+        CALL print_str
+        
+        HLT
+        
+hello_str:
+        DB \"Hello, World!\", 0
+"
+    return program
+
+def getAddProgram() -> string
+    program = "
+; Add Two Numbers Program
+
+        ORG 0x1000
+        
+        MOVI R1, 10
+        MOVI R2, 20
+        ADD R3, R1, R2
+        
+        HLT
+"
+    return program
+
+def getFactorialProgram() -> string
+    program = "
+; Factorial Program
+
+        ORG 0x1000
+        
+        MOVI R1, 5
+        MOVI R2, 1
+        
+loop:   MUL R2, R2, R1
+        SUBI R1, R1, 1
+        CMP R1, R0
+        JNE loop
+        
+        HLT
+"
+    return program
+
+def getFibonacciProgram() -> string
+    program = "
+; Fibonacci Sequence Program
+
+        ORG 0x1000
+        
+        MOVI R1, 0
+        MOVI R2, 1
+        MOVI R3, 10
+        
+fib:    PUSH R1
+        ADD R1, R1, R2
+        POP R2
+        SUBI R3, R3, 1
+        CMP R3, R0
+        JNE fib
+        
+        HLT
+"
+    return program
+
+# === Main Entry Point ===
+
+def main()
+    print("=== AddX Assembler Module ===")
+    print("Version: " + getAssemblerVersion())
+    print("")
+    print("Supported opcodes: " + str(len(listSupportedOpcodes())))
+    print("Supported registers: " + str(len(listSupportedRegisters())))
+    print("")
+    
+    program = getAddProgram()
+    print("Example ADD program:")
+    print(program)
+    
+    isValid = validateAssembly(program)
+    print("Valid: " + str(isValid))
+    
+    return 0

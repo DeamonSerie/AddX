@@ -1,0 +1,428 @@
+# AddX Python Compatibility Module
+# Provides Python-like functions that aren't built into AddX
+
+# === List Functions ===
+
+def append(list_: list<any>, item: any) -> list<any>
+    list_.append(item)
+    return list_
+
+def pop(list_: list<any>, index: int = -1) -> any
+    if index == -1 then
+        if len(list_) > 0 then
+            item = list_[-1]
+            list_.pop()
+            return item
+        return nothing
+    end
+    
+    if index >= 0 and index < len(list_) then
+        item = list_[index]
+        list_.remove(index)
+        return item
+    return nothing
+
+def insert(list_: list<any>, index: int, item: any) -> list<any>
+    if index < 0 then
+        index = 0
+    end
+    if index > len(list_) then
+        index = len(list_)
+    end
+    
+    newList = []
+    for i in range(index) do
+        newList.append(list_[i])
+    end
+    newList.append(item)
+    for i in range(index, len(list_)) do
+        newList.append(list_[i])
+    end
+    
+    return newList
+
+def remove(list_: list<any>, item: any) -> bool
+    for i in range(len(list_)) do
+        if list_[i] == item then
+            list_.remove(i)
+            return true
+        end
+    end
+    return false
+
+def extend(list1: list<any>, list2: list<any>) -> list<any>
+    for item in list2 do
+        list1.append(item)
+    end
+    return list1
+
+def index(list_: list<any>, item: any) -> int
+    for i in range(len(list_)) do
+        if list_[i] == item then
+            return i
+        end
+    end
+    return -1
+
+def count(list_: list<any>, item: any) -> int
+    c = 0
+    for i in range(len(list_)) do
+        if list_[i] == item then
+            c = c + 1
+        end
+    end
+    return c
+
+def sort(list_: list<any>) -> list<any>
+    # Bubble sort for demonstration
+    n = len(list_)
+    for i in range(n) do
+        for j in range(0, n - i - 1) do
+            if list_[j] > list_[j + 1] then
+                temp = list_[j]
+                list_[j] = list_[j + 1]
+                list_[j + 1] = temp
+            end
+        end
+    end
+    return list_
+
+def reverse(list_: list<any>) -> list<any>
+    newList = []
+    for i in range(len(list_) - 1, -1, -1) do
+        newList.append(list_[i])
+    end
+    return newList
+
+def clear(list_: list<any>) -> list<any>
+    while len(list_) > 0 do
+        list_.pop()
+    end
+    return list_
+
+def copy(list_: list<any>) -> list<any>
+    newList = []
+    for item in list_ do
+        newList.append(item)
+    end
+    return newList
+
+# === Dict Functions ===
+
+def dictGet(d: dict<string, any>, key: string, default: any = nothing) -> any
+    if d.contains(key) then
+        return d[key]
+    return default
+
+def dictKeys(d: dict<string, any>) -> list<string>
+    return d.keys()
+
+def dictValues(d: dict<string, any>) -> list<any>
+    return d.values()
+
+def dictItems(d: dict<string, any>) -> list<tuple<string, any>>
+    result = []
+    for key in d.keys() do
+        result.append((key, d[key]))
+    end
+    return result
+
+def dictPop(d: dict<string, any>, key: string, default: any = nothing) -> any
+    if d.contains(key) then
+        value = d[key]
+        d.remove(key)
+        return value
+    return default
+
+def dictClear(d: dict<string, any>) -> dict<string, any>
+    keys = d.keys()
+    for key in keys do
+        d.remove(key)
+    end
+    return d
+
+def dictUpdate(d: dict<string, any>, other: dict<string, any>) -> dict<string, any>
+    for key in other.keys() do
+        d[key] = other[key]
+    end
+    return d
+
+def dictContains(d: dict<string, any>, key: string) -> bool
+    return d.contains(key)
+
+# === Math Functions ===
+
+def abs(n: int) -> int
+    if n < 0 then
+        return -n
+    return n
+
+def absFloat(n: float) -> float
+    if n < 0.0 then
+        return -n
+    return n
+
+def min2(a: int, b: int) -> int
+    if a < b then
+        return a
+    return b
+
+def max2(a: int, b: int) -> int
+    if a > b then
+        return a
+    return b
+
+def minList(list_: list<int>) -> int
+    if len(list_) == 0 then
+        return 0
+    end
+    minVal = list_[0]
+    for i in range(1, len(list_)) do
+        if list_[i] < minVal then
+            minVal = list_[i]
+        end
+    end
+    return minVal
+
+def maxList(list_: list<int>) -> int
+    if len(list_) == 0 then
+        return 0
+    end
+    maxVal = list_[0]
+    for i in range(1, len(list_)) do
+        if list_[i] > maxVal then
+            maxVal = list_[i]
+        end
+    end
+    return maxVal
+
+def pow(base: int, exp: int) -> int
+    result = 1
+    for i in range(exp) do
+        result = result * base
+    end
+    return result
+
+def powFloat(base: float, exp: float) -> float
+    # Simple approximation
+    result = 1.0
+    if exp > 0 then
+        for i in range(exp) do
+            result = result * base
+        end
+    elif exp < 0 then
+        # For negative exponents, return 0 (simplified)
+        return 0.0
+    end
+    return result
+
+def floor(n: float) -> int
+    return toInt(n)
+
+def ceil(n: float) -> int
+    if n > toInt(n) then
+        return toInt(n) + 1
+    end
+    return toInt(n)
+
+def round_(n: float) -> int
+    frac = n - toInt(n)
+    if frac >= 0.5 then
+        return toInt(n) + 1
+    end
+    return toInt(n)
+
+# === Utility Functions ===
+
+def enumerate(list_: list<any>) -> list<tuple<int, any>>
+    result = []
+    for i in range(len(list_)) do
+        result.append((i, list_[i]))
+    end
+    return result
+
+def zip(list1: list<any>, list2: list<any>) -> list<tuple<any, any>>
+    result = []
+    minLen = min2(len(list1), len(list2))
+    for i in range(minLen) do
+        result.append((list1[i], list2[i]))
+    end
+    return result
+
+def map(list_: list<any>, func: (any) -> any) -> list<any>
+    result = []
+    for item in list_ do
+        result.append(func(item))
+    end
+    return result
+
+def filter(list_: list<any>, func: (any) -> bool) -> list<any>
+    result = []
+    for item in list_ do
+        if func(item) then
+            result.append(item)
+        end
+    end
+    return result
+
+def any(list_: list<bool>) -> bool
+    for item in list_ do
+        if item then
+            return true
+        end
+    end
+    return false
+
+def all(list_: list<bool>) -> bool
+    for item in list_ do
+        if not item then
+            return false
+        end
+    end
+    return true
+
+def sum(list_: list<int>) -> int
+    total = 0
+    for item in list_ do
+        total = total + item
+    end
+    return total
+
+def product(list_: list<int>) -> int
+    total = 1
+    for item in list_ do
+        total = total * item
+    end
+    return total
+
+def sorted(list_: list<any>) -> list<any>
+    result = copy(list_)
+    sort(result)
+    return result
+
+def reversed(list_: list<any>) -> list<any>
+    return reverse(copy(list_))
+
+# === Type Functions ===
+
+def type_(obj: any) -> string
+    if obj == nothing then
+        return "None"
+    end
+    # Basic type detection
+    return "unknown"
+
+def isinstance(obj: any, typeName: string) -> bool
+    return type_(obj) == typeName
+
+def isString(obj: any) -> bool
+    return type_(obj) == "string"
+
+def isInt(obj: any) -> bool
+    return type_(obj) == "int"
+
+def isFloat(obj: any) -> bool
+    return type_(obj) == "float"
+
+def isBool(obj: any) -> bool
+    return type_(obj) == "bool"
+
+def isList(obj: any) -> bool
+    return type_(obj) == "list"
+
+def isDict(obj: any) -> bool
+    return type_(obj) == "dict"
+
+# === String Functions (additional) ===
+
+def strip(s: string) -> string
+    return trim(s)
+
+def ljust(s: string, width: int) -> string
+    diff = width - len(s)
+    if diff <= 0 then
+        return s
+    end
+    result = s
+    for i in range(diff) do
+        result = result + " "
+    end
+    return result
+
+def rjust(s: string, width: int) -> string
+    diff = width - len(s)
+    if diff <= 0 then
+        return s
+    end
+    result = ""
+    for i in range(diff) do
+        result = result + " "
+    end
+    result = result + s
+    return result
+
+def zfill(s: string, width: int) -> string
+    diff = width - len(s)
+    if diff <= 0 then
+        return s
+    end
+    result = ""
+    for i in range(diff) do
+        result = result + "0"
+    end
+    result = result + s
+    return result
+
+# === Range Function ===
+
+def range_(start: int, stop: int = -1, step: int = 1) -> list<int>
+    result = []
+    
+    if stop == -1 then
+        stop = start
+        start = 0
+    end
+    
+    if step > 0 then
+        i = start
+        while i < stop do
+            result.append(i)
+            i = i + step
+        end
+    elif step < 0 then
+        i = start
+        while i > stop do
+            result.append(i)
+            i = i + step
+        end
+    
+    return result
+
+# === Main ===
+
+def main()
+    # List examples
+    nums = [3, 1, 4, 1, 5, 9]
+    print("Original: " + str(nums))
+    print("Sorted: " + str(sorted(nums)))
+    print("Reversed: " + str(reversed(nums)))
+    print("Sum: " + str(sum(nums)))
+    print("Min: " + str(minList(nums)))
+    print("Max: " + str(maxList(nums)))
+    
+    # Dict examples
+    d = {"name": "Alice", "age": 25}
+    print("Dict: " + str(d))
+    print("Keys: " + str(dictKeys(d)))
+    print("Get age: " + str(dictGet(d, "age")))
+    print("Get city: " + str(dictGet(d, "city", "Unknown")))
+    
+    # Math examples
+    print("abs(-5): " + str(abs(-5)))
+    print("pow(2, 8): " + str(pow(2, 8)))
+    print("round(3.7): " + str(round_(3.7)))
+    
+    # Enumerate
+    print("Enumerate: " + str(enumerate(["a", "b", "c"])))
+    
+    return 0

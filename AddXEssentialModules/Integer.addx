@@ -1,0 +1,1041 @@
+# AddX Integer Library
+# Integer handling, big integers, bit operations, and number theory
+
+import PyCompat
+
+# === Integer ===
+
+# =============================================================================
+# BIG INTEGER
+# =============================================================================
+
+class BigInt
+    sign: int
+    digits: list<int>  # Base 1,000,000,000 (1e9)
+    
+    def init(value: int = 0)
+        if value < 0:
+            this.sign = -1
+            value = -value
+        else:
+            this.sign = 1
+        
+        this.digits = []
+        
+        while value > 0:
+            this.digits.append(value % 1000000000)
+            value = value / 1000000000
+    
+    def initString(value: string, base: int = 10)
+        this.sign = 1
+        this.digits = []
+        
+        for c in value:
+            digit: int = Integer.charToDigit(c)
+            this.multiplyBaseAdd(digit, base)
+    
+    def fromString(value: string): BigInt
+        return Integer.BigInt.initString(value)
+    
+    def toString(base: int = 10): string
+        if this.isZero():
+            return "0"
+        
+        result: string = ""
+        temp: list<int> = this.digits.copy()
+        tempSign: int = this.sign
+        
+        while not this.isZero():
+            remainder: int = 0
+            for i in range(len(temp) - 1, -1, -1):
+                current: int = remainder * 1000000000 + temp[i]
+                temp[i] = current / base
+                remainder = current % base
+            
+            result = Integer.digitToChar(remainder) + result
+            this.removeLeadingZeros(temp)
+        
+        if tempSign < 0:
+            result = "-" + result
+        
+        return result
+    
+    def isZero(): bool
+        return len(this.digits) == 0
+    
+    def isNegative(): bool
+        return this.sign < 0
+    
+    def isPositive(): bool
+        return this.sign > 0 and not this.isZero()
+    
+    def compare(other: BigInt): int
+        if len(this.digits) != len(other.digits):
+            if len(this.digits) < len(other.digits):
+                return -1
+            return 1
+        
+        for i in range(len(this.digits) - 1, -1, -1):
+            if this.digits[i] != other.digits[i]:
+                if this.digits[i] < other.digits[i]:
+                    return -1
+                return 1
+        
+        return 0
+    
+    def abs(): BigInt
+        result: BigInt = BigInt()
+        result.digits = this.digits.copy()
+        result.sign = 1
+        return result
+    
+    def negate(): BigInt
+        result: BigInt = BigInt()
+        result.digits = this.digits.copy()
+        result.sign = -this.sign
+        return result
+    
+    def add(other: BigInt): BigInt
+        if other.isZero():
+            return this
+        
+        if this.isZero():
+            return other
+        
+        result: BigInt = BigInt()
+        
+        if this.sign == other.sign:
+            result.sign = this.sign
+            result.digits = this.addDigits(this.digits, other.digits)
+        else:
+            cmp: int = this.abs().compare(other.abs())
+            if cmp == 0:
+                return result
+            
+            if cmp > 0:
+                result.sign = this.sign
+                result.digits = this.subtractDigits(this.digits, other.digits)
+            else:
+                result.sign = other.sign
+                result.digits = this.subtractDigits(other.digits, this.digits)
+        
+        return result
+    
+    def subtract(other: BigInt): BigInt
+        return this.add(other.negate())
+    
+    def multiply(other: BigInt): BigInt
+        if this.isZero() or other.isZero():
+            return BigInt()
+        
+        result: BigInt = BigInt()
+        result.sign = this.sign * other.sign
+        
+        for i in range(len(this.digits)):
+            for j in range(len(other.digits)):
+                product: int = this.digits[i] * other.digits[j]
+                result.digits = result.addSingleDigit(product, i + j)
+        
+        result.normalize()
+        return result
+    
+    def divide(other: BigInt): tuple<BigInt, BigInt>
+        # Returns (quotient, remainder)
+        quotient: BigInt = BigInt()
+        remainder: BigInt = BigInt()
+        
+        if other.isZero():
+            # Division by zero error
+            return quotient, remainder
+        
+        if this.abs().compare(other.abs()) < 0:
+            return quotient, this.abs()
+        
+        dividend: BigInt = this.abs()
+        divisor: BigInt = other.abs()
+        
+        while dividend.compare(divisor) >= 0:
+            shift: int = dividend.bitLength() - divisor.bitLength()
+            if shift < 0:
+                shift = 0
+            
+            shifted: BigInt = divisor << shift
+            shifted.sign = 1
+            
+            while dividend.compare(shifted) >= 0:
+                quotient.digits = quotient.addSingleDigit(1 << shift)
+                dividend = dividend.subtract(shifted)
+        
+        quotient.sign = this.sign * other.sign
+        remainder = dividend
+    
+    def mod(other: BigInt): BigInt
+        q: BigInt
+        r: BigInt
+        q, r = this.divide(other)
+        return r
+    
+    def pow(exponent: int): BigInt
+        result: BigInt = BigInt(1)
+        base: BigInt = this.copy()
+        
+        while exponent > 0:
+            if exponent % 2 == 1:
+                result = result.multiply(base)
+            base = base.multiply(base)
+            exponent = exponent / 2
+        
+        return result
+    
+    def bitLength(): int
+        if this.isZero():
+            return 0
+        
+        mostSignificant: int = this.digits[-1]
+        bits: int = 0
+        
+        while mostSignificant > 0:
+            bits = bits + 1
+            mostSignificant = mostMinimum >> 1
+        
+        return bits + (len(this.digits) - 1) * 30
+    
+    def copy(): BigInt
+        result: BigInt = BigInt()
+        result.sign = this.sign
+        result.digits = this.digits.copy()
+        return result
+    
+    def addDigits(a: list<int>, b: list<int>): list<int>
+        result: list<int>
+        carry: int = 0
+        maxLen: int = Math.max(len(a), len(b))
+        
+        for i in range(maxLen):
+            sum: int = carry
+            if i < len(a):
+                sum = sum + a[i]
+            if i < len(b):
+                sum = sum + b[i]
+            
+            result.append(sum % 1000000000)
+            carry = sum / 1000000000
+        
+        if carry > 0:
+            result.append(carry)
+        
+        return result
+    
+    def subtractDigits(a: list<int>, b: list<int>): list<int>
+        result: list<int>
+        borrow: int = 0
+        
+        for i in range(len(a)):
+            diff: int = a[i] - borrow
+            if i < len(b):
+                diff = diff - b[i]
+            
+            if diff < 0:
+                diff = diff + 1000000000
+                borrow = 1
+            else:
+                borrow = 0
+            
+            result.append(diff)
+        
+        return result
+    
+    def addSingleDigit(value: int, position: int)
+        while position >= len(this.digits):
+            this.digits.append(0)
+        
+        this.digits[position] = this.digits[position] + value
+        carry: int = this.digits[position] / 1000000000
+        this.digits[position] = this.digits[position] % 1000000000
+        
+        while carry > 0:
+            position = position + 1
+            if position >= len(this.digits):
+                this.digits.append(0)
+            
+            this.digits[position] = this.digits[position] + carry
+            carry = this.digits[position] / 1000000000
+            this.digits[position] = this.digits[position] % 1000000000
+    
+    def multiplyBaseAdd(digit: int, base: int)
+        carry: int = digit
+        
+        for i in range(len(this.digits)):
+            current: int = this.digits[i] * base + carry
+            this.digits[i] = current % 1000000000
+            carry = current / 1000000000
+        
+        while carry > 0:
+            this.digits.append(carry % 1000000000)
+            carry = carry / 1000000000
+    
+    def removeLeadingZeros(arr: list<int>)
+        while len(arr) > 0 and arr[-1] == 0:
+            arr.pop()
+    
+    def normalize()
+        this.removeLeadingZeros(this.digits)
+
+# =============================================================================
+# BIT OPERATIONS
+# =============================================================================
+
+def bitAnd(a: int, b: int): int
+    pass
+
+def bitOr(a: int, b: int): int
+    pass
+
+def bitXor(a: int, b: int): int
+    pass
+
+def bitNot(a: int): int
+    pass
+
+def bitShiftLeft(a: int, bits: int): int
+    pass
+
+def bitShiftRight(a: int, bits: int): int
+    pass
+
+def bitRotateLeft(a: int, bits: int, width: int = 32): int
+    pass
+
+def bitRotateRight(a: int, bits: int, width: int = 32): int
+    pass
+
+def countLeadingZeros(a: int, width: int = 32): int
+    pass
+
+def countTrailingZeros(a: int): int
+    pass
+
+def countOnes(a: int): int
+    # Population count (Hamming weight)
+    pass
+
+def mostSignificantBit(a: int): int
+    return Integer.floorLog2(a) + 1 if a > 0 else 0
+
+def leastSignificantBit(a: int): int
+    return Integer.countTrailingZeros(a)
+
+# =============================================================================
+# INTEGER MATH FUNCTIONS
+# =============================================================================
+
+def abs(x: int): int
+    return -x if x < 0 else x
+
+def min(a: int, b: int): int
+    return b if a > b else a
+
+def max(a: int, b: int): int
+    return a if a > b else b
+
+def minOf(values: list<int>): int
+    result: int = values[0]
+    for v in values:
+        if v < result:
+            result = v
+    return result
+
+def maxOf(values: list<int>): int
+    result: int = values[0]
+    for v in values:
+        if v > result:
+            result = v
+    return result
+
+def clamp(value: int, minVal: int, maxVal: int): int
+    if value < minVal:
+        return minVal
+    if value > maxVal:
+        return maxVal
+    return value
+
+def sign(x: int): int
+    return -1 if x < 0 else (1 if x > 0 else 0)
+
+def isEven(x: int): bool
+    return x % 2 == 0
+
+def isOdd(x: int): bool
+    return x % 2 != 0
+
+def isPositive(x: int): bool
+    return x > 0
+
+def isNegative(x: int): bool
+    return x < 0
+
+def isZero(x: int): bool
+    return x == 0
+
+def isPowerOfTwo(x: int): bool
+    return x > 0 and (x & (x - 1)) == 0
+
+def isPrime(n: int): bool
+    if n < 2:
+        return False
+    if n == 2:
+        return True
+    if n % 2 == 0:
+        return False
+    if n < 9:
+        return True
+    
+    r: int = Integer.floorSqrt(n)
+    i: int = 3
+    
+    while i <= r:
+        if n % i == 0:
+            return False
+        i = i + 2
+    
+    return True
+
+def isPerfectSquare(n: int): bool
+    if n < 0:
+        return False
+    
+    root: int = Integer.floorSqrt(n)
+    return root * root == n
+
+def isPerfectCube(n: int): bool
+    root: int = Integer.round(Integer.cuberoot(n))
+    return root * root * root == n
+
+def gcd(a: int, b: int): int
+    # Greatest common divisor (Euclidean algorithm)
+    a = abs(a)
+    b = abs(b)
+    
+    while b != 0:
+        t: int = b
+        b = a % b
+        a = t
+    
+    return a
+
+def lcm(a: int, b: int): int
+    # Least common multiple
+    if a == 0 or b == 0:
+        return 0
+    return abs(a * b) / gcd(a, b)
+
+def extendedGcd(a: int, b: int): tuple<int, int, int>
+    # Returns (g, x, y) where g = gcd(a,b) = ax + by
+    if a == 0:
+        return b, 0, 1
+    
+    g: int
+    x1: int
+    y1: int
+    g, x1, y1 = extendedGcd(b % a, a)
+    
+    x: int = y1 - (b / a) * x1
+    y: int = x1
+    
+    return g, x, y
+
+def inverseMod(a: int, m: int): int
+    # Modular multiplicative inverse
+    g: int
+    x: int
+    y: int
+    g, x, y = extendedGcd(a, m)
+    
+    if g != 1:
+        return 0  # No inverse exists
+    
+    return (x % m + m) % m
+
+def powMod(base: int, exp: int, mod: int): int
+    # Modular exponentiation
+    result: int = 1
+    base = base % mod
+    
+    while exp > 0:
+        if exp % 2 == 1:
+            result = (result * base) % mod
+        exp = exp / 2
+        base = (base * base) % mod
+    
+    return result
+
+def factorial(n: int): int
+    if n <= 1:
+        return 1
+    
+    result: int = 1
+    for i in range(2, n + 1):
+        result = result * i
+    
+    return result
+
+def fibonacci(n: int): int
+    if n <= 1:
+        return n
+    
+    a: int = 0
+    b: int = 1
+    
+    for i in range(2, n + 1):
+        c: int = a + b
+        a = b
+        b = c
+    
+    return b
+
+def fibonacciLarge(n: int): BigInt
+    if n <= 1:
+        return BigInt(n)
+    
+    a: BigInt = BigInt(0)
+    b: BigInt = BigInt(1)
+    
+    for i in range(2, n + 1):
+        c: BigInt = a.add(b)
+        a = b
+        b = c
+    
+    return b
+
+# =============================================================================
+# NUMBER THEORY
+# =============================================================================
+
+def primeFactors(n: int): list<int>
+    factors: list<int>
+    
+    while n % 2 == 0:
+        factors.append(2)
+        n = n / 2
+    
+    i: int = 3
+    while i * i <= n:
+        while n % i == 0:
+            factors.append(i)
+            n = n / i
+        i = i + 2
+    
+    if n > 2:
+        factors.append(n)
+    
+    return factors
+
+def allDivisors(n: int): list<int>
+    divisors: list<int> = []
+    
+    i: int = 1
+    while i * i <= n:
+        if n % i == 0:
+            divisors.append(i)
+            if i != n / i:
+                divisors.append(n / i)
+        i = i + 1
+    
+    divisors.sort()
+    return divisors
+
+def properDivisors(n: int): list<int>
+    divs: list<int> = Integer.allDivisors(n)
+    result: list<int> = []
+    
+    for d in divs:
+        if d < n:
+            result.append(d)
+    
+    return result
+
+def divisorCount(n: int): int
+    factors: list<int> = Integer.primeFactors(n)
+    
+    if len(factors) == 0:
+        return 1
+    
+    uniqueFactors: list<int> = []
+    for f in factors:
+        if len(uniqueFactors) == 0 or uniqueFactors[-1] != f:
+            uniqueFactors.append(f)
+    
+    result: int = 1
+    count: int = 1
+    
+    for i in range(1, len(uniqueFactors)):
+        if uniqueFactors[i] == uniqueFactors[i - 1]:
+            count = count + 1
+        else:
+            result = result * (count + 1)
+            count = 1
+    
+    result = result * (count + 1)
+    return result
+
+def divisorSum(n: int): int
+    divs: list<int> = Integer.allDivisors(n)
+    result: int = 0
+    
+    for d in divs:
+        result = result + d
+    
+    return result
+
+def eulerTotient(n: int): int
+    result: int = n
+    temp: int = n
+    p: int = 2
+    
+    while p * p <= temp:
+        if temp % p == 0:
+            while temp % p == 0:
+                temp = temp / p
+            result = result / p * (p - 1)
+        p = p + 1
+    
+    if temp > 1:
+        result = result / temp * (temp - 1)
+    
+    return result
+
+def mobius(n: int): int
+    # Möbius function
+    factors: list<int> = Integer.primeFactors(n)
+    unique: list<int> = []
+    
+    for f in factors:
+        if len(unique) == 0 or unique[-1] != f:
+            unique.append(f)
+    
+    if len(unique) < len(factors):
+        return 0  # Has squared prime factor
+    
+    if len(unique) % 2 == 0:
+        return 1
+    
+    return -1
+
+def liouville(n: int): int
+    # Liouville function
+    factors: list<int> = Integer.primeFactors(n)
+    
+    if len(factors) % 2 == 0:
+        return 1
+    
+    return -1
+
+def is Carmichael(n: int): bool
+    # Carmichael function
+    if n < 2:
+        return False
+    
+    divs: list<int> = Integer.allDivisors(n)
+    
+    for d in divs:
+        if d > 1 and n % (d - 1) != 0:
+            return False
+    
+    return True
+
+# =============================================================================
+# PRIMALITY TESTING
+# =============================================================================
+
+def millerRabin(n: int, iterations: int = 10): bool
+    if n < 2:
+        return False
+    if n == 2:
+        return True
+    if n % 2 == 0:
+        return False
+    
+    if n < 2047:
+        return isPrime(n)
+    
+    r: int = 0
+    d: int = n - 1
+    
+    while d % 2 == 0:
+        r = r + 1
+        d = d / 2
+    
+    for i in range(iterations):
+        a: int = Integer.randomInt(2, n - 2)
+        x: int = powMod(a, d, n)
+        
+        if x == 1 or x == n - 1:
+            continue
+        
+        for j in range(r - 1):
+            x = powMod(x, 2, n)
+            if x == n - 1:
+                break
+        else:
+            return False
+    
+    return True
+
+def isProbablePrime(n: int): bool
+    return MillerRabin(n, 10)
+
+# =============================================================================
+# MODULAR ARITHMETIC
+# =============================================================================
+
+def modAdd(a: int, b: int, m: int): int
+    return ((a % m) + (b % m)) % m
+
+def modSub(a: int, b: int, m: int): int
+    return ((a % m) - (b % m) + m) % m
+
+def modMul(a: int, b: int, m: int): int
+    return ((a % m) * (b % m)) % m
+
+def modDiv(a: int, b: int, m: int): int
+    inv: int = inverseMod(b, m)
+    if inv == 0:
+        return 0
+    return (a % m) * inv % m
+
+def modNeg(a: int, m: int): int
+    return (m - (a % m)) % m
+
+def modPow(base: int, exp: int, m: int): int
+    return powMod(base, exp, m)
+
+# =============================================================================
+# CONVERSIONS
+# =============================================================================
+
+def toBinary(n: int): string
+    if n == 0:
+        return "0"
+    
+    result: string = ""
+    sign: int = 1
+    
+    if n < 0:
+        sign = -1
+        n = -n
+    
+    while n > 0:
+        result = str(n % 2) + result
+        n = n / 2
+    
+    if sign < 0:
+        result = "-" + result
+    
+    return result
+
+def toOctal(n: int): string
+    if n == 0:
+        return "0"
+    
+    result: string = ""
+    
+    while n > 0:
+        result = str(n % 8) + result
+        n = n / 8
+    
+    return result
+
+def toHex(n: int): string
+    if n == 0:
+        return "0"
+    
+    result: string = ""
+    
+    while n > 0:
+        remainder: int = n % 16
+        result = Integer.digitToChar(remainder) + result
+        n = n / 16
+    
+    return result
+
+def fromBinary(s: string): int
+    result: int = 0
+    
+    for c in s:
+        if c == '0' or c == '1':
+            result = result * 2 + (c == '1')
+    
+    return result
+
+def fromOctal(s: string): int
+    result: int = 0
+    
+    for c in s:
+        if c >= '0' and c <= '7':
+            result = result * 8 + (ord(c) - ord('0'))
+    
+    return result
+
+def fromHex(s: string): int
+    result: int = 0
+    
+    for c in s:
+        result = result * 16 + Integer.charToDigit(c)
+    
+    return result
+
+def digitsToInt(digits: list<int>, base: int = 10): int
+    result: int = 0
+    
+    for d in digits:
+        result = result * base + d
+    
+    return result
+
+def intToDigits(n: int, base: int = 10): list<int>
+    digits: list<int>
+    
+    while n > 0:
+        digits.append(n % base)
+        n = n / base
+    
+    digits.reverse()
+    return digits
+
+# =============================================================================
+# APPROXIMATION FUNCTIONS
+# =============================================================================
+
+def floorSqrt(n: int): int
+    if n < 0:
+        return 0
+    
+    if n < 2:
+        return n
+    
+    x: int = n / 2
+    y: int = (x + 1) / 2
+    
+    while y < x:
+        x = y
+        y = (x + n / x) / 2
+    
+    return x
+
+def ceilSqrt(n: int): int
+    result: int = floorSqrt(n)
+    if result * result < n:
+        result = result + 1
+    return result
+
+def floorCubeRoot(n: int): int
+    if n >= 0:
+        x: int = n / 3
+        while x * x * x > n:
+            x = (2 * x + n / (x * x)) / 3
+    else:
+        x = -((-n) / 3)
+        while x * x * x > n:
+            x = (2 * x + n / (x * x)) / 3
+    
+    return x
+
+def ceilCubeRoot(n: int): int
+    result: int = floorCubeRoot(n)
+    if result * result * result < n:
+        result = result + 1
+    return result
+
+def round(n: int): int
+    return (n + (n % 2)) / 2
+
+# =============================================================================
+# UTILITY FUNCTIONS
+# =============================================================================
+
+def between(value: int, minVal: int, maxVal: int): bool
+    return value >= minVal and value <= maxVal
+
+def digitCount(n: int): int
+    if n == 0:
+        return 1
+    
+    count: int = 0
+    n = abs(n)
+    
+    while n > 0:
+        count = count + 1
+        n = n / 10
+    
+    return count
+
+def digitSum(n: int): int
+    sum: int = 0
+    n = abs(n)
+    
+    while n > 0:
+        sum = sum + (n % 10)
+        n = n / 10
+    
+    return sum
+
+def digitProduct(n: int): int
+    if n == 0:
+        return 0
+    
+    product: int = 1
+    n = abs(n)
+    
+    while n > 0:
+        d: int = n % 10
+        if d != 0:
+            product = product * d
+        n = n / 10
+    
+    return product
+
+def reverseDigits(n: int): int
+    result: int = 0
+    n = abs(n)
+    
+    while n > 0:
+        result = result * 10 + (n % 10)
+        n = n / 10
+    
+    return result
+
+def rotateDigits(n: int, k: int): int
+    # Rotate digits by k positions
+    s: string = str(abs(n))
+    k = k % len(s)
+    
+    if k < 0:
+        k = k + len(s)
+    
+    if k == 0:
+        return n
+    
+    rotated: string = s[-k:] + s[:-k]
+    result: int = Integer.fromBinary(rotated)
+    
+    return -result if n < 0 else result
+
+def palindromeNumber(n: int): bool
+    return n == reverseDigits(n)
+
+def happyNumber(n: int): bool
+    # Happy number check (iterates sum of squares of digits)
+    seen: list<int> = []
+    
+    while n != 1 and n not in seen:
+        seen.append(n)
+        n = digitSumPow(n, 2)
+    
+    return n == 1
+
+def digitSumPow(n: int, power: int): int
+    sum: int = 0
+    
+    while n > 0:
+        d: int = n % 10
+        sum = sum + d * d * power if power > 1 else d * d
+        n = n / 10
+    
+    return sum
+
+def floorLog2(n: int): int
+    if n <= 0:
+        return 0
+    
+    result: int = 0
+    
+    while n > 0:
+        result = result + 1
+        n = n >> 1
+    
+    return result - 1
+
+def ceilLog2(n: int): int
+    return floorLog2(n - 1) + 1
+
+# =============================================================================
+# CONSTANTS
+# =============================================================================
+
+ZERO: int = 0
+ONE: int = 1
+TWO: int = 2
+TEN: int = 10
+HUNDRED: int = 100
+THOUSAND: int = 1000
+MILLION: int = 1000000
+BILLION: int = 1000000000
+
+MIN_INT: int = -2147483648
+MAX_INT: int = 2147483647
+MIN_INT64: int = -9223372036854775808
+MAX_INT64: int = 9223372036854775807
+
+# =============================================================================
+# CONVENIENCE FUNCTIONS
+# =============================================================================
+
+def randomPrime(bits: int = 32): int
+    while True:
+        n: int = Integer.randomInt(1 << (bits - 1), 1 << bits)
+        if isPrime(n):
+            return n
+
+def randomOdd(bits: int = 32): int
+    result: int = Integer.randomInt(1 << (bits - 1), 1 << bits)
+    
+    while result % 2 == 0:
+        result = Integer.randomInt(1 << (bits - 1), 1 << bits)
+    
+    return result
+
+def randomCoprime(n: int): int
+    while True:
+        r: int = Integer.randomInt(2, n - 1)
+        if gcd(r, n) == 1:
+            return r
+
+# Private helper functions for BigInt
+def multiplyBase(value: int, base: int): list<int>
+    result: list<int>
+    carry: int = 0
+    
+    for d in value:
+        current: int = d * base + carry
+        result.append(current % 1000000000)
+        carry = current / 1000000000
+    
+    while carry > 0:
+        result.append(carry % 1000000000)
+        carry = carry / 1000000000
+    
+    return result
+
+def charToDigit(c: string): int
+    code: int = ord(c)
+    if code >= 48 and code <= 57:
+        return code - 48
+    if code >= 65 and code <= 90:
+        return code - 55
+    if code >= 97 and code <= 122:
+        return code - 87
+    return 0
+
+def digitToChar(d: int): string
+    if d < 10:
+        return chr(48 + d)
+    return chr(55 + d)
+
+def removeLeadingZeros(arr: list<int>)
+    while len(arr) > 0 and arr[-1] == 0:
+        arr.pop()
+
+def bitWidth(n: int): int
+    if n <= 0:
+        return 0
+    return floorLog2(n) + 1

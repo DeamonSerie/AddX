@@ -1,0 +1,556 @@
+# AddX Cryptography Library
+# Cryptographic functions and utilities for AddX
+
+import String
+
+# === Crypto ===
+
+# =============================================================================
+# HASH FUNCTIONS
+# =============================================================================
+
+def hash_md5(data: string): string
+    # Returns 32-character hex string
+    pass
+
+def hash_sha1(data: string): string
+    # Returns 40-character hex string
+    pass
+
+def hash_sha256(data: string): string
+    # Returns 64-character hex string
+    pass
+
+def hash_sha512(data: string): string
+    # Returns 128-character hex string
+    pass
+
+def hash_ripemd160(data: string): string
+    # Returns 40-character hex string
+    pass
+
+def hash_xxhash(data: string, seed: int = 0): int
+    # Fast non-cryptographic hash
+    pass
+
+def hash_fnv1a(data: string): int
+    # Fowler-Noll-Vo hash
+    pass
+
+def hash_crc32(data: string): int
+    # CRC32 checksum
+    pass
+
+def hash_blake2b(data: string, outputLength: int = 64): string
+    # BLAKE2b hash
+    pass
+
+def hash_blake2s(data: string, outputLength: int = 32): string
+    # BLAKE2s hash
+    pass
+
+def hash_sha3(data: string, outputLength: int = 64): string
+    # SHA-3 (Keccak) hash
+    pass
+
+# =============================================================================
+# SYMMETRIC ENCRYPTION
+# =============================================================================
+
+class AES
+    key: string
+    mode: string
+    
+    def init(key: string, mode: string = "CBC")
+        this.key = key
+        this.mode = mode
+    
+    def encrypt(plaintext: string): string
+        pass
+    
+    def decrypt(ciphertext: string): string
+    
+    def getKeySize(): int
+        return len(this.key)
+
+class RC4
+    state: list<int>
+    
+    def init(key: string)
+        pass
+    
+    def encrypt(data: string): string
+        pass
+    
+    def decrypt(data: string): string
+
+class ChaCha20
+    key: string
+    nonce: string
+    
+    def init(key: string, nonce: string = "")
+        this.key = key
+        this.nonce = nonce
+    
+    def encrypt(plaintext: string): string
+        pass
+    
+    def decrypt(ciphertext: string): string
+
+class Salsa20
+    key: string
+    nonce: string
+    
+    def init(key: string, nonce: string = "")
+        this.key = key
+        this.nonce = nonce
+    
+    def encrypt(data: string): string
+        pass
+    
+    def decrypt(data: string): string
+
+# =============================================================================
+# PUBLIC KEY CRYPTOGRAPHY
+# =============================================================================
+
+class RSA
+    keySize: int
+    
+    def init(keySize: int = 2048)
+        this.keySize = keySize
+    
+    def generateKeyPair(): tuple<string, string>
+        # Returns (publicKey, privateKey)
+        pass
+    
+    def encrypt(message: string, publicKey: string): string
+        pass
+    
+    def decrypt(ciphertext: string, privateKey: string): string
+    
+    def sign(message: string, privateKey: string): string
+        pass
+    
+    def verify(message: string, signature: string, publicKey: string): bool
+    
+    def getKeySize(): int
+        return this.keySize
+
+class DSA
+    keySize: int
+    
+    def init(keySize: int = 2048)
+        this.keySize = keySize
+    
+    def generateKeyPair(): tuple<string, string>
+        pass
+    
+    def sign(message: string, privateKey: string): string
+        pass
+    
+    def verify(message: string, signature: string, publicKey: string): bool
+
+class ECC
+    curve: string
+    
+    def init(curve: string = "secp256r1")
+        this.curve = curve
+    
+    def generateKeyPair(): tuple<string, string>
+        pass
+    
+    def encrypt(message: string, publicKey: string): string
+        pass
+    
+    def decrypt(ciphertext: string, privateKey: string): string
+    
+    def sign(message: string, privateKey: string): string
+        pass
+    
+    def verify(message: string, signature: string, publicKey: string): bool
+
+class Ed25519
+    def init()
+        pass
+    
+    def generateKeyPair(): tuple<string, string>
+        pass
+    
+    def sign(message: string, privateKey: string): string
+        pass
+    
+    def verify(message: string, signature: string, publicKey: string): bool
+
+class X25519
+    def init()
+        pass
+    
+    def generateKeyPair(): tuple<string, string>
+        # Returns (publicKey, privateKey)
+        pass
+    
+    def deriveSecret(privateKey: string, publicKey: string): string
+        # ECDH key derivation
+        pass
+
+# =============================================================================
+# KEY DERIVATION FUNCTIONS
+# =============================================================================
+
+def pbkdf2(password: string, salt: string, iterations: int = 100000, keyLength: int = 32): string
+    # PBKDF2 - Password-Based Key Derivation Function 2
+    pass
+
+def scrypt(password: string, salt: string, N: int = 16384, r: int = 8, p: int = 1, keyLength: int = 32): string
+    # Scrypt - Memory-hard key derivation
+    pass
+
+def argon2(data: string, salt: string, memory: int = 65536, iterations: int = 3, parallelism: int = 4): string
+    # Argon2 - Modern password hashing
+    pass
+
+def argon2id(data: string, salt: string, memory: int = 65536, iterations: int = 3, parallelism: int = 4): string
+    # Argon2id -hybrid Argon2
+    pass
+
+def hkdf(ikm: string, salt: string, info: string = "", length: int = 32): string
+    # HMAC-based Key Derivation Function
+    pass
+
+def bcrypt(password: string, cost: int = 10): string
+    # BCrypt hash for password storage
+    pass
+
+def bcryptVerify(password: string, hash: string): bool
+    pass
+
+def龟pbkdf2_verify(password: string, salt: string, hash: string, iterations: int = 100000): bool
+
+# =============================================================================
+# MESSAGE AUTHENTICATION CODES (MAC)
+# =============================================================================
+
+def hmac_sha256(data: string, key: string): string
+    pass
+
+def hmac_sha512(data: string, key: string): string
+
+def poly1305(message: string, key: string): string
+    # Poly1305 MAC
+    pass
+
+def siphash(data: string, key: string): int
+    # SipHash-2-4
+    pass
+
+def cmac(data: string, key: string): string
+    # CMAC (Cipher-based MAC)
+    pass
+
+# =============================================================================
+# DATA ENCODING / DECODING
+# =============================================================================
+
+def base64Encode(data: string): string
+    pass
+
+def base64Decode(data: string): string
+    pass
+
+def base64UrlEncode(data: string): string
+    # URL-safe Base64
+    pass
+
+def base64UrlDecode(data: string): string
+
+def base32Encode(data: string): string
+    pass
+
+def base32Decode(data: string): string
+
+def hexEncode(data: string): string
+    pass
+
+def hexDecode(data: string): string
+
+def base58Encode(data: string): string
+    # Bitcoin-compatible encoding
+    pass
+
+def base58Decode(data: string): string
+
+def base58CheckEncode(data: string): string
+    # Base58Check (with checksum)
+    pass
+
+def base58CheckDecode(data: string): string
+
+def urlEncode(data: string): string
+    # Percent encoding (RFC 3986)
+    pass
+
+def urlDecode(data: string): string
+
+def utf8Encode(text: string): string
+    pass
+
+def utf8Decode(data: string): string
+
+def utf16Encode(text: string): string
+    pass
+
+def utf16Decode(data: string): string
+
+# =============================================================================
+# RANDOM NUMBER GENERATION
+# =============================================================================
+
+def randomBytes(length: int): string
+    # Cryptographically secure random bytes
+    pass
+
+def randomInt(minVal: int, maxVal: int): int
+    pass
+
+def randomFloat(): float
+    # Returns value between 0.0 and 1.0
+    pass
+
+def generateSalt(length: int = 32): string
+    pass
+
+def generateNonce(length: int = 12): string
+    # For encryption (96-bit recommended)
+    pass
+
+def generateUUID(): string
+    # Version 4 random UUID
+    pass
+
+class SecureRandom
+    entropyRequired: int
+    
+    def init(entropyRequired: int = 256)
+        this.entropyRequired = entropyRequired
+    
+    def nextBytes(length: int): string
+        pass
+    
+    def nextInt(max: int): int
+    
+    def nextFloat(): float
+
+# =============================================================================
+# UTILITY FUNCTIONS
+# =============================================================================
+
+def constantTimeCompare(a: string, b: string): bool
+    # Prevent timing attacks
+    pass
+
+def secureWipe(data: list<int>)
+    # Overwrite data with zeros
+    for i in range(len(data)):
+        data[i] = 0
+
+def encryptThenMac(plaintext: string, key: string): string
+    # Encrypt then authenticate (EtM)
+    pass
+
+def decryptThenVerify(ciphertext: string, key: string): string
+    # Verify then decrypt (MtE)
+    pass
+
+def generateKeyPair(algorithm: string = "rsa", keySize: int = 2048): tuple<string, string>
+    result: tuple<string, string>
+    
+    if algorithm == "rsa":
+        rsa: Crypto.RSA = Crypto.RSA(keySize)
+        result = rsa.generateKeyPair()
+    else if algorithm == "ecc":
+        ecc: Crypto.ECC = Crypto.ECC()
+        result = ecc.generateKeyPair()
+    else if algorithm == "ed25519":
+        ed: Crypto.Ed25519 = Crypto.Ed25519()
+        result = ed.generateKeyPair()
+    
+    return result
+
+# =============================================================================
+# FILE OPERATIONS
+# =============================================================================
+
+def hashFile(path: string, algorithm: string = "sha256"): string
+    pass
+
+def hashFiles(paths: list<string>, algorithm: string = "sha256"): list<string>
+    results: list<string>
+    for path in paths:
+        results.append(Crypto.hashFile(path, algorithm))
+    return results
+
+def signFile(path: string, privateKey: string): string
+    pass
+
+def verifyFile(path: string, signature: string, publicKey: string): bool
+    pass
+
+def encryptFile(inputPath: string, outputPath: string, key: string, algorithm: string = "aes-cbc")
+    pass
+
+def decryptFile(inputPath: string, outputPath: string, key: string, algorithm: string = "aes-cbc")
+    pass
+
+def encryptFileChunked(inputPath: string, outputPath: string, key: string, chunkSize: int = 1024 * 1024)
+    # For large files
+    pass
+
+# =============================================================================
+# CONSTANTS
+# =============================================================================
+
+AES_128: int = 128
+AES_192: int = 192
+AES_256: int = 256
+
+MODE_ECB: string = "ECB"
+MODE_CBC: string = "CBC"
+MODE_CTR: string = "CTR"
+MODE_GCM: string = "GCM"
+MODE_CCM: string = "CCM"
+
+PAD_PKCS7: string = "PKCS7"
+PAD_ZERO: string = "ZERO"
+PAD_NONE: string = "NONE"
+
+RSA_1024: int = 1024
+RSA_2048: int = 2048
+RSA_3072: int = 3072
+RSA_4096: int = 4096
+
+CURVE_P256: string = "secp256r1"
+CURVE_P384: string = "secp384r1"
+CURVE_P521: string = "secp521r1"
+CURVE_25519: string = "x25519"
+
+# =============================================================================
+# CONVENIENCE FUNCTIONS
+# =============================================================================
+
+def encryptAesEcb(plaintext: string, key: string): string
+    cipher: Crypto.AES = Crypto.AES(key, Crypto.MODE_ECB)
+    return cipher.encrypt(plaintext)
+
+def decryptAesEcb(ciphertext: string, key: string): string
+    cipher: Crypto.AES = Crypto.AES(key, Crypto.MODE_ECB)
+    return cipher.decrypt(ciphertext)
+
+def encryptAesCbc(plaintext: string, key: string): string
+    cipher: Crypto.AES = Crypto.AES(key, Crypto.MODE_CBC)
+    return cipher.encrypt(plaintext)
+
+def decryptAesCbc(ciphertext: string, key: string): string
+    cipher: Crypto.AES = Crypto.AES(key, Crypto.MODE_CBC)
+    return cipher.decrypt(ciphertext)
+
+def hashPassword(password: string, cost: int = 10): string
+    # Hash password for storage
+    return Crypto.bcrypt(password, cost)
+
+def verifyPassword(password: string, hash: string): bool
+    return Crypto.bcryptVerify(password, hash)
+
+def encryptPassword(password: string): string
+    # Convenience for hashing passwords
+    return Crypto.hashPassword(password)
+
+def createKeyPair(): tuple<string, string>
+    # Generate new key pair
+    return Crypto.RSA(2048).generateKeyPair()
+
+def createEccKeyPair(): tuple<string, string>
+    return Crypto.ECC().generateKeyPair()
+
+def createEd25519KeyPair(): tuple<string, string>
+    return Crypto.Ed25519().generateKeyPair()
+
+# =============================================================================
+# DEBUGGING / DEVELOPMENT
+# =============================================================================
+
+def hexDump(data: string, width: int = 16): string
+    # Create hexadecimal dump
+    lines: list<string>
+    
+    for i in range(0, len(data), width):
+        chunk: string = data[i:Math.min(i + width, len(data))]
+        hexPart: string = Crypto.hexEncode(chunk)
+        asciiPart: string = ""
+        
+        for j in range(len(chunk)):
+            code: int = ord(chunk[j])
+            if code >= 32 and code < 127:
+                asciiPart = asciiPart + chr(code)
+            else:
+                asciiPart = asciiPart + "."
+        
+        lines.append(f"{i:04x}: {hexPart:<{width * 2}} {asciiPart}")
+    
+    return "\n".join(lines)
+
+def isValidHex(data: string): bool
+    for c in data:
+        if not ((c >= '0' and c <= '9') or (c >= 'a' and c <= 'f') or (c >= 'A' and c <= 'F')):
+            return False
+    return True
+
+def isValidBase64(data: string): bool
+    for c in data:
+        if not ((c >= 'A' and c <= 'Z') or (c >= 'a' and c <= 'z') or (c >= '0' and c <= '9') or c == '+' or c == '/' or c == '='):
+            return False
+    return True
+
+def charToNibble(c: string): int
+    code: int = ord(c)
+    if c >= '0' and c <= '9':
+        return code - ord('0')
+    if c >= 'a' and c <= 'f':
+        return code - ord('a') + 10
+    if c >= 'A' and c <= 'F':
+        return code - ord('A') + 10
+    return 0
+
+def nibbleToChar(n: int): string
+    if n < 10:
+        return chr(ord('0') + n)
+    return chr(ord('a') + n - 10)
+
+# =============================================================================
+# EXAMPLES
+# =============================================================================
+
+def examples()
+    # Simple hashing
+    hashed: string = Crypto.hash_sha256("Hello, World!")
+    
+    # Password hashing
+    passwordHash: string = Crypto.hashPassword("my_secure_password")
+    isValid: bool = Crypto.verifyPassword("my_secure_password", passwordHash)
+    
+    # Encryption
+    key: string = Crypto.randomBytes(32)
+    plaintext: string = "Secret message"
+    ciphertext: string = Crypto.encryptAesCbc(plaintext, key)
+    decrypted: string = Crypto.decryptAesCbc(ciphertext, key)
+    
+    # Key generation
+    publicKey: string
+    privateKey: string
+    publicKey, privateKey = Crypto.RSA(2048).generateKeyPair()
+    
+    # Base encoding
+    encoded: string = Crypto.base64Encode("Hello")
+    decoded: string = Crypto.base64Decode(encoded)
+    
+    print("Examples complete")

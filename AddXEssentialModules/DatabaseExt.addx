@@ -1,0 +1,96 @@
+# === DatabaseExt ===
+
+class Handler
+    search: (query: string) -> list<row>
+    grab: (path: string) -> data
+    edit: (path: string, content: data) -> bool
+    remove: (path: string) -> bool
+    execute: (command: string) -> result
+
+class DatabaseLanguage
+    name: string
+    handler: Handler
+    extensions: list<string>
+
+# === Registry ===
+class Registry
+    databases: dict<string, DatabaseLanguage>
+    
+    def register(db: DatabaseLanguage)
+        databases[db.name] = db
+    
+    def get(name: string) -> DatabaseLanguage?
+        if databases.contains(name) then
+            return databases[name]
+        return nothing
+    
+    def unregister(name: string)
+        if databases.contains(name) then
+            databases.remove(name)
+    
+    def list() -> list<string>
+        return databases.keys
+
+# === Operations ===
+def search(db: string, query: string) -> list<row>
+    lang = Registry.get(db)
+    if lang != nothing then
+        return lang.handler.search(query)
+    raise "Database not registered: " + db
+
+def grab(db: string, path: string) -> data
+    lang = Registry.get(db)
+    if lang != nothing then
+        return lang.handler.grab(path)
+    raise "Database not registered: " + db
+
+def edit(db: string, path: string, content: data) -> bool
+    lang = Registry.get(db)
+    if lang != nothing then
+        return lang.handler.edit(path, content)
+    raise "Database not registered: " + db
+
+def remove(db: string, path: string) -> bool
+    lang = Registry.get(db)
+    if lang != nothing then
+        return lang.handler.remove(path)
+    raise "Database not registered: " + db
+
+def execute(db: string, command: string) -> result
+    lang = Registry.get(db)
+    if lang != nothing then
+        return lang.handler.execute(command)
+    raise "Database not registered: " + db
+
+# === Custom ===
+def createHandler(
+    searchFn: (query: string) -> list<row>,
+    grabFn: (path: string) -> data,
+    editFn: (path: string, content: data) -> bool,
+    removeFn: (path: string) -> bool,
+    executeFn: (command: string) -> result
+) -> Handler
+    return Handler(
+        search = searchFn,
+        grab = grabFn,
+        edit = editFn,
+        remove = removeFn,
+        execute = executeFn
+    )
+
+def createDatabase(
+    name: string,
+    handler: Handler,
+    extensions: list<string>
+) -> DatabaseLanguage
+    return DatabaseLanguage(
+        name = name,
+        handler = handler,
+        extensions = extensions
+    )
+
+def registerCustom(db: DatabaseLanguage)
+    Registry.register(db)
+
+def unregisterCustom(name: string)
+    Registry.unregister(name)

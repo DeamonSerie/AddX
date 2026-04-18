@@ -1,0 +1,450 @@
+# Vector Namespace for AddX
+# Provides 2D/3D vector operations, color conversions, shader properties, and light source controls
+
+import Math
+
+# ----------------------------
+# Vector2 class
+# ----------------------------
+class Vector2:
+    # Constructor
+    def __init__(self, x: float, y: float):
+        self.x = x
+        self.y = y
+
+    # String representation (for debugging)
+    def to_string(self) -> string:
+        return "Vector2(" + self.x + ", " + self.y + ")"
+
+    # Vector addition
+    def add(self, other: 'Vector2') -> 'Vector2':
+        return Vector2(self.x + other.x, self.y + other.y)
+
+    # Vector subtraction
+    def sub(self, other: 'Vector2') -> 'Vector2':
+        return Vector2(self.x - other.x, self.y - other.y)
+
+    # Scalar multiplication
+    def mul(self, scalar: float) -> 'Vector2':
+        return Vector2(self.x * scalar, self.y * scalar)
+
+    # Dot product
+    def dot(self, other: 'Vector2') -> float:
+        return self.x * other.x + self.y * other.y
+
+    # Cross product magnitude (2D cross product returns scalar)
+    def cross(self, other: 'Vector2') -> float:
+        return self.x * other.y - self.y * other.x
+
+    # Length (magnitude)
+    def length(self) -> float:
+        return Math.sqrt(self.x * self.x + self.y * self.y)
+
+    # Normalize (return unit vector)
+    def normalize(self) -> 'Vector2':
+        len = self.length()
+        if len == 0:
+            return Vector2(0, 0)
+        return Vector2(self.x / len, self.y / len)
+
+    # Distance to another vector
+    def distance(self, other: 'Vector2') -> float:
+        dx = self.x - other.x
+        dy = self.y - other.y
+        return Math.sqrt(dx * dx + dy * dy)
+
+    # Linear interpolation (lerp) between two vectors
+    def lerp(self, other: 'Vector2', t: float) -> 'Vector2':
+        return Vector2(self.x + (other.x - self.x) * t,
+                       self.y + (other.y - self.y) * t)
+
+# ----------------------------
+# Vector3 class
+# ----------------------------
+class Vector3:
+    # Constructor
+    def __init__(self, x: float, y: float, z: float):
+        self.x = x
+        self.y = y
+        self.z = z
+
+    def to_string(self) -> string:
+        return "Vector3(" + self.x + ", " + self.y + ", " + self.z + ")"
+
+    # Addition
+    def add(self, other: 'Vector3') -> 'Vector3':
+        return Vector3(self.x + other.x, self.y + other.y, self.z + other.z)
+
+    # Subtraction
+    def sub(self, other: 'Vector3') -> 'Vector3':
+        return Vector3(self.x - other.x, self.y - other.y, self.z - other.z)
+
+    # Scalar multiplication
+    def mul(self, scalar: float) -> 'Vector3':
+        return Vector3(self.x * scalar, self.y * scalar, self.z * scalar)
+
+    # Dot product
+    def dot(self, other: 'Vector3') -> float:
+        return self.x * other.x + self.y * other.y + self.z * other.z
+
+    # Cross product (returns Vector3)
+    def cross(self, other: 'Vector3') -> 'Vector3':
+        return Vector3(self.y * other.z - self.z * other.y,
+                       self.z * other.x - self.x * other.z,
+                       self.x * other.y - self.y * other.x)
+
+    # Length
+    def length(self) -> float:
+        return Math.sqrt(self.x * self.x + self.y * self.y + self.z * self.z)
+
+    # Normalize
+    def normalize(self) -> 'Vector3':
+        len = self.length()
+        if len == 0:
+            return Vector3(0, 0, 0)
+        return Vector3(self.x / len, self.y / len, self.z / len)
+
+    # Distance
+    def distance(self, other: 'Vector3') -> float:
+        dx = self.x - other.x
+        dy = self.y - other.y
+        dz = self.z - other.z
+        return Math.sqrt(dx * dx + dy * dy + dz * dz)
+
+    # Lerp
+    def lerp(self, other: 'Vector3', t: float) -> 'Vector3':
+        return Vector3(self.x + (other.x - self.x) * t,
+                       self.y + (other.y - self.y) * t,
+                       self.z + (other.z - self.z) * t)
+
+# ----------------------------
+# Color class (supports RGB, HSL, CMYK, RGBA/HSLA)
+# ----------------------------
+class Color:
+    # Internal storage as RGBA floats 0-1
+    def __init__(self, r: float, g: float, b: float, a: float = 1.0):
+        self.r = Math.max(0.0, Math.min(1.0, r))
+        self.g = Math.max(0.0, Math.min(1.0, g))
+        self.b = Math.max(0.0, Math.min(1.0, b))
+        self.a = Math.max(0.0, Math.min(1.0, a))
+
+    # Factory methods
+    @staticmethod
+    def from_rgb(r: float, g: float, b: float, a: float = 1.0) -> 'Color':
+        return Color(r, g, b, a)
+
+    @staticmethod
+    def from_hsl(h: float, s: float, l: float, a: float = 1.0) -> 'Color':
+        # Convert HSL to RGB (h in [0,360), s,l in [0,1])
+        h = h % 360
+        s = Math.max(0.0, Math.min(1.0, s))
+        l = Math.max(0.0, Math.min(1.0, l))
+        c = (1 - Math.abs(2 * l - 1)) * s
+        x = c * (1 - Math.abs((h / 60) % 2 - 1))
+        m = l - c / 2
+        if h < 60:
+            r1, g1, b1 = c, x, 0
+        elif h < 120:
+            r1, g1, b1 = x, c, 0
+        elif h < 180:
+            r1, g1, b1 = 0, c, x
+        elif h < 240:
+            r1, g1, b1 = 0, x, c
+        elif h < 300:
+            r1, g1, b1 = x, 0, c
+        else:
+            r1, g1, b1 = c, 0, x
+        return Color(r1 + m, g1 + m, b1 + m, a)
+
+    @staticmethod
+    def from_cmyk(c: float, m: float, y: float, k: float, a: float = 1.0) -> 'Color':
+        # CMYK values in [0,1]
+        c = Math.max(0.0, Math.min(1.0, c))
+        m = Math.max(0.0, Math.min(1.0, m))
+        y = Math.max(0.0, Math.min(1.0, y))
+        k = Math.max(0.0, Math.min(1.0, k))
+        r = 1 - Math.min(1, c * (1 - k) + k)
+        g = 1 - Math.min(1, m * (1 - k) + k)
+        b = 1 - Math.min(1, y * (1 - k) + k)
+        return Color(r, g, b, a)
+
+    @staticmethod
+    def from_hex(hex_str: string) -> 'Color':
+        # Expect format "#RRGGBB" or "#RRGGBBAA"
+        hex_str = hex_str.strip()
+        if hex_str.startswith("#"):
+            hex_str = hex_str[1:]
+        length = len(hex_str)
+        if length == 6:
+            r = int(hex_str[0:2], 16) / 255.0
+            g = int(hex_str[2:4], 16) / 255.0
+            b = int(hex_str[4:6], 16) / 255.0
+            return Color(r, g, b, 1.0)
+        elif length == 8:
+            r = int(hex_str[0:2], 16) / 255.0
+            g = int(hex_str[2:4], 16) / 255.0
+            b = int(hex_str[4:6], 16) / 255.0
+            a = int(hex_str[6:8], 16) / 255.0
+            return Color(r, g, b, a)
+        else:
+            # Default to white if invalid
+            return Color(1, 1, 1, 1)
+
+    # Getters
+    def to_rgb(self) -> tuple:
+        return (self.r, self.g, self.b)
+
+    def to_rgba(self) -> tuple:
+        return (self.r, self.g, self.b, self.a)
+
+    def to_hsl(self) -> tuple:
+        # Convert RGB to HSL
+        r, g, b = self.r, self.g, self.b
+        max_val = Math.max(r, Math.max(g, b))
+        min_val = Math.min(r, Math.min(g, b))
+        delta = max_val - min_val
+        l = (max_val + min_val) / 2
+        if delta == 0:
+            h = 0
+            s = 0
+        else:
+            s = delta / (1 - Math.abs(2 * l - 1))
+            if max_val == r:
+                h = 60 * (((g - b) / delta) % 6)
+            elif max_val == g:
+                h = 60 * (((b - r) / delta) + 2)
+            else:
+                h = 60 * (((r - g) / delta) + 4)
+            if h < 0:
+                h += 360
+        return (h, s, l)
+
+    def to_cmyk(self) -> tuple:
+        # Convert RGB to CMYK
+        r, g, b = self.r, self.g, self.b
+        if r == 0 and g == 0 and b == 0:
+            return (0, 0, 0, 1)
+        c = 1 - r
+        m = 1 - g
+        y = 1 - b
+        k = Math.min(c, Math.min(m, y))
+        if k == 1:
+            return (0, 0, 0, 1)
+        c = (c - k) / (1 - k)
+        m = (m - k) / (1 - k)
+        y = (y - k) / (1 - k)
+        return (c, m, y, k)
+
+    def to_hex(self) -> string:
+        # Returns "#RRGGBB"
+        r_hex = format(int(self.r * 255), '02x')
+        g_hex = format(int(self.g * 255), '02x')
+        b_hex = format(int(self.b * 255), '02x')
+        return "#" + r_hex + g_hex + b_hex
+
+    def to_hex_a(self) -> string:
+        # Returns "#RRGGBBAA"
+        r_hex = format(int(self.r * 255), '02x')
+        g_hex = format(int(self.g * 255), '02x')
+        b_hex = format(int(self.b * 255), '02x')
+        a_hex = format(int(self.a * 255), '02x')
+        return "#" + r_hex + g_hex + b_hex + a_hex
+
+    def to_string(self) -> string:
+        return "Color(RGBA: " + self.r + ", " + self.g + ", " + self.b + ", " + self.a + ")"
+
+    # Blend colors (alpha blending)
+    def blend(self, other: 'Color') -> 'Color':
+        # Source over destination
+        src_a = self.a
+        dst_a = other.a
+        out_a = src_a + dst_a * (1 - src_a)
+        if out_a == 0:
+            return Color(0, 0, 0, 0)
+        out_r = (self.r * src_a + other.r * dst_a * (1 - src_a)) / out_a
+        out_g = (self.g * src_a + other.g * dst_a * (1 - src_a)) / out_a
+        out_b = (self.b * src_a + other.b * dst_a * (1 - src_a)) / out_a
+        return Color(out_r, out_g, out_b, out_a)
+
+# ----------------------------
+# Shader class (simple property container)
+# ----------------------------
+class Shader:
+    def __init__(self, name: string):
+        self.name = name
+        self.properties = {}  # map string -> float/int/color/etc
+        self.textures = {}    # map string -> texture handle (placeholder)
+        self.uniforms = {}    # map string -> value
+
+    def set_float(self, key: string, value: float):
+        self.uniforms[key] = value
+
+    def set_int(self, key: string, value: int):
+        self.uniforms[key] = value
+
+    def set_color(self, key: string, color: Color):
+        self.uniforms[key] = color
+
+    def set_vector2(self, key: string, vec: Vector2):
+        self.uniforms[key] = vec
+
+    def set_vector3(self, key: string, vec: Vector3):
+        self.uniforms[key] = vec
+
+    def get_float(self, key: string) -> float:
+        return self.uniforms.get(key, 0.0)
+
+    def get_int(self, key: string) -> int:
+        return self.uniforms.get(key, 0)
+
+    def get_color(self, key: string) -> Color:
+        return self.uniforms.get(key, Color(1, 1, 1, 1))
+
+    def get_vector2(self, key: string) -> Vector2:
+        return self.uniforms.get(key, Vector2(0, 0))
+
+    def get_vector3(self, key: string) -> Vector3:
+        return self.uniforms.get(key, Vector3(0, 0, 0))
+
+    def to_string(self) -> string:
+        return "Shader(" + self.name + ")"
+
+# ----------------------------
+# LightSource class
+# ----------------------------
+class LightSource:
+    # Light types
+    DIRECTIONAL = 0
+    POINT = 1
+    SPOT = 2
+
+    def __init__(self, light_type: int, position: Vector3, color: Color, intensity: float = 1.0):
+        self.type = light_type
+        self.position = position
+        self.color = color
+        self.intensity = intensity
+        # For spot lights
+        self.direction = Vector3(0, 0, -1)  # default pointing down
+        self.cutoff = Math.cos(Math.radians(30))  # default 30-degree cone
+        self.exponent = 10.0
+
+    def set_direction(self, dir: Vector3):
+        self.direction = dir.normalize()
+
+    def set_spot_cutoff(self, angle_degrees: float):
+        self.cutoff = Math.cos(Math.radians(angle_degrees))
+
+    def set_spot_exponent(self, exponent: float):
+        self.exponent = exponent
+
+    def to_string(self) -> string:
+        type_names = ["Directional", "Point", "Spot"]
+        return "Light(" + type_names[self.type] + ")"
+
+# ----------------------------
+# Utility functions for vector math and collisions
+# ----------------------------
+def vector2_distance(a: Vector2, b: Vector2) -> float:
+    return a.distance(b)
+
+def vector3_distance(a: Vector3, b: Vector3) -> float:
+    return a.distance(b)
+
+def vector2_dot(a: Vector2, b: Vector2) -> float:
+    return a.dot(b)
+
+def vector3_dot(a: Vector3, b: Vector3) -> float:
+    return a.dot(b)
+
+def vector2_length(v: Vector2) -> float:
+    return v.length()
+
+def vector3_length(v: Vector3) -> float:
+    return v.length()
+
+def vector2_normalize(v: Vector2) -> Vector2:
+    return v.normalize()
+
+def vector3_normalize(v: Vector3) -> Vector3:
+    return v.normalize()
+
+def vector2_lerp(a: Vector2, b: Vector2, t: float) -> Vector2:
+    return a.lerp(b, t)
+
+def vector3_lerp(a: Vector3, b: Vector3, t: float) -> Vector3:
+    return a.lerp(b, t)
+
+# Simple AABB collision for 2D (axis-aligned bounding box)
+def aabb2d_overlap(min1: Vector2, max1: Vector2, min2: Vector2, max2: Vector2) -> bool:
+    return (min1.x <= max2.x and max1.x >= min2.x and
+            min1.y <= max2.y and max1.y >= min2.y)
+
+# Simple sphere collision for 3D
+def sphere_overlap(pos1: Vector3, radius1: float, pos2: Vector3, radius2: float) -> bool:
+    distance = pos1.distance(pos2)
+    return distance < (radius1 + radius2)
+
+# ----------------------------
+# Example usage (when run directly)
+# ----------------------------
+def main():
+    print("=== Vector Namespace Demo ===")
+    # Vector2 demo
+    v1 = Vector2(1, 2)
+    v2 = Vector2(3, 4)
+    print("v1:", v1.to_string())
+    print("v2:", v2.to_string())
+    print("v1 + v2:", v1.add(v2).to_string())
+    print("v1.dot(v2):", v1.dot(v2))
+    print("v1.length():", v1.length())
+    print("v1.normalize():", v1.normalize().to_string())
+    print()
+
+    # Vector3 demo
+    v3 = Vector3(0, 1, 0)
+    v4 = Vector3(1, 0, 0)
+    print("v3:", v3.to_string())
+    print("v4:", v4.to_string())
+    print("v3.cross(v4):", v3.cross(v4).to_string())
+    print("v3.dot(v4):", v3.dot(v4))
+    print()
+
+    # Color demo
+    red = Color.from_rgb(1, 0, 0)
+    blue = Color.from_hsl(240, 1, 0.5)
+    yellow = Color.from_hex("#FFFF00")
+    print("Red:", red.to_string(), "Hex:", red.to_hex())
+    print("Blue (HSL):", blue.to_string(), "Hex:", blue.to_hex())
+    print("Yellow (Hex):", yellow.to_string(), "RGB:", yellow.to_rgb())
+    print("Red blended with Blue:", red.blend(blue).to_string())
+    print()
+
+    # Shader demo
+    shader = Shader("BasicLit")
+    shader.set_vector3("lightPos", Vector3(5, 5, 5))
+    shader.set_color("lightColor", Color.from_rgb(1, 1, 0.8))
+    shader.set_float("shininess", 32.0)
+    print("Shader:", shader.to_string())
+    print("  lightPos:", shader.get_vector3("lightPos").to_string())
+    print("  lightColor:", shader.get_color("lightColor").to_string())
+    print("  shininess:", shader.get_float("shininess"))
+    print()
+
+    # LightSource demo
+    light = LightSource(LightSource.POINT, Vector3(0, 10, 0), Color.from_rgb(1, 0.8, 0.6), 2.0)
+    print("Light:", light.to_string())
+    print("  Position:", light.position.to_string())
+    print("  Color:", light.color.to_string())
+    print("  Intensity:", light.intensity)
+    print()
+
+    # Collision demo
+    print("--- Collision Tests ---")
+    print("AABB2D overlap (0,0)-(2,2) vs (1,1)-(3,3):",
+          aabb2d_overlap(Vector2(0,0), Vector2(2,2), Vector2(1,1), Vector2(3,3)))
+    print("Sphere overlap (0,0,0) r=1 vs (1.5,0,0) r=1:",
+          sphere_overlap(Vector3(0,0,0), 1.0, Vector3(1.5,0,0), 1.0))
+    print("=== End Demo ===")
+
+if __name__ == "__main__":
+    main()

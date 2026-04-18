@@ -1,0 +1,241 @@
+# AddX Scientific Notation Module
+# Handle scientific notation and floating point numbers
+
+import Integer
+import Math
+
+# === ScientificFloat ===
+
+class ScientificFloat
+    significand: float
+    exponent: int
+    
+    def init(significand: float, exponent: int)
+        this.significand = significand
+        this.exponent = exponent
+        this.normalize()
+    
+    def normalize()
+        if this.significand == 0.0 then
+            this.exponent = 0
+            return
+        
+        while Math.abs(this.significand) >= 10.0 do
+            this.significand = this.significand / 10.0
+            this.exponent = this.exponent + 1
+        
+        while Math.abs(this.significand) < 1.0 do
+            this.significand = this.significand * 10.0
+            this.exponent = this.exponent - 1
+    
+    def toString() -> string
+        return str(this.significand) + "e" + str(this.exponent)
+    
+    def toDouble() -> float
+        return this.significand * Math.pow(10.0, this.exponent)
+    
+    def add(other: ScientificFloat) -> ScientificFloat
+        if this.exponent >= other.exponent then
+            adjusted = other.significand * Math.pow(10.0, other.exponent - this.exponent)
+            return ScientificFloat.new(this.significand + adjusted, this.exponent)
+        else
+            adjusted = this.significand * Math.pow(10.0, this.exponent - other.exponent)
+            return ScientificFloat.new(other.significand + adjusted, other.exponent)
+    
+    def subtract(other: ScientificFloat) -> ScientificFloat
+        if this.exponent >= other.exponent then
+            adjusted = other.significand * Math.pow(10.0, other.exponent - this.exponent)
+            return ScientificFloat.new(this.significand - adjusted, this.exponent)
+        else
+            adjusted = this.significand * Math.pow(10.0, this.exponent - other.exponent)
+            return ScientificFloat.new(other.significand - adjusted, other.exponent)
+    
+    def multiply(other: ScientificFloat) -> ScientificFloat
+        return ScientificFloat.new(
+            this.significand * other.significand,
+            this.exponent + other.exponent
+        )
+    
+    def divide(other: ScientificFloat) -> ScientificFloat
+        if other.significand == 0.0 then
+            return ScientificFloat.new(0.0, 0)
+        return ScientificFloat.new(
+            this.significand / other.significand,
+            this.exponent - other.exponent
+        )
+
+# === Parsing ===
+
+def parseScientific(s: string) -> ScientificFloat
+    s = trim(s)
+    
+    hasE = false
+    ePos = 0
+    
+    for i in range(len(s)) do
+        if s[i] == "e" or s[i] == "E" then
+            hasE = true
+            ePos = i
+            break
+    
+    if not hasE then
+        val = toFloat(s)
+        return ScientificFloat.new(val, 0)
+    
+    mantissa = substring(s, 0, ePos)
+    expStr = substring(s, ePos + 1, len(s))
+    
+    mantissa = trim(mantissa)
+    expStr = trim(expStr)
+    
+    if startsWith(expStr, "+") then
+        expStr = substring(expStr, 1, len(expStr))
+    
+    mantissaVal = toFloat(mantissa)
+    expVal = toInt(expStr)
+    
+    return ScientificFloat.new(mantissaVal, expVal)
+
+def toScientific(val: float, precision: int = 6) -> ScientificFloat
+    if val == 0.0 then
+        return ScientificFloat.new(0.0, 0)
+    
+    exp = 0
+    
+    if Math.abs(val) >= 10.0 then
+        while Math.abs(val) >= 10.0 do
+            val = val / 10.0
+            exp = exp + 1
+    elif Math.abs(val) < 1.0 then
+        while Math.abs(val) < 1.0 do
+            val = val * 10.0
+            exp = exp - 1
+    
+    rounded = Math.round(val * Math.pow(10.0, precision)) / Math.pow(10.0, precision)
+    
+    return ScientificFloat.new(rounded, exp)
+
+# === Formatting ===
+
+def formatScientific(val: float, precision: int = 2) -> string
+    sci = toScientific(val, precision)
+    return sci.toString()
+
+def formatEngineering(val: float) -> string
+    if val == 0.0 then
+        return "0e0"
+    
+    exp = toInt(Math.floor(Math.log10(Math.abs(val)))
+    exp3 = exp - (exp % 3)
+    
+    mantissa = val / Math.pow(10.0, exp3)
+    
+    if exp3 >= 0 then
+        return str(mantissa) + "e" + str(exp3)
+    else
+        return str(mantissa) + "e" + str(exp3)
+
+def formatSI(val: float) -> string
+    if val == 0.0 then
+        return "0"
+    
+    absVal = Math.abs(val)
+    exp = toInt(Math.floor(Math.log10(absVal)))
+    exp3 = exp - (exp % 3)
+    
+    mantissa = val / Math.pow(10.0, exp3)
+    
+    prefixes = ["", "k", "M", "G", "T", "P", "E", "Z", "Y"]
+    prefixesNeg = ["", "m", "u", "n", "p", "f", "a", "z", "y"]
+    
+    idx = toInt(exp3 / 3)
+    
+    if idx >= 0 and idx < len(prefixes) then
+        return str(mantissa) + prefixes[idx]
+    elif idx < 0 and -idx < len(prefixesNeg) then
+        return str(mantissa) + prefixesNeg[-idx]
+    
+    return formatScientific(val)
+
+# === Operations ===
+
+def scientificAdd(a: float, b: float) -> ScientificFloat
+    sa = toScientific(a)
+    sb = toScientific(b)
+    return sa.add(sb)
+
+def scientificSub(a: float, b: float) -> ScientificFloat
+    sa = toScientific(a)
+    sb = toScientific(b)
+    return sa.subtract(sb)
+
+def scientificMul(a: float, b: float) -> ScientificFloat
+    sa = toScientific(a)
+    sb = toScientific(b)
+    return sa.multiply(sb)
+
+def scientificDiv(a: float, b: float) -> ScientificFloat
+    sa = toScientific(a)
+    sb = toScientific(b)
+    return sa.divide(sb)
+
+# === Comparison ===
+
+def scientificCompare(a: float, b: float) -> int
+    sa = toScientific(a)
+    sb = toScientific(b)
+    
+    if sa.exponent > sb.exponent then
+        return 1
+    elif sa.exponent < sb.exponent then
+        return -1
+    
+    if sa.significand > sb.significand then
+        return 1
+    elif sa.significand < sb.significand then
+        return -1
+    
+    return 0
+
+def scientificEqual(a: float, b: float, tolerance: float = 1e-10) -> bool
+    diff = Math.abs(a - b)
+    return diff < tolerance
+
+# === Example Main ===
+
+def main()
+    print("=== Scientific Notation Module ===")
+    
+    # Basic usage
+    val = 12345.6789
+    sci = toScientific(val)
+    print("Value: " + str(val))
+    print("Scientific: " + sci.toString())
+    print("Back to double: " + str(sci.toDouble()))
+    
+    print("")
+    
+    # Formatting
+    print("Format scientific (0.000123): " + formatScientific(0.000123))
+    print("Format scientific (1234000): " + formatScientific(1234000))
+    print("Format engineering (1234000): " + formatEngineering(1234000))
+    print("Format SI (1234000): " + formatSI(1234000))
+    print("Format SI (0.000123): " + formatSI(0.000123))
+    
+    print("")
+    
+    # Operations
+    result = scientificAdd(1e5, 2e3)
+    print("1e5 + 2e3 = " + result.toString())
+    
+    result = scientificMul(2e3, 3e2)
+    print("2e3 * 3e2 = " + result.toString())
+    
+    print("")
+    
+    # Parsing
+    parsed = parseScientific("1.23e-4")
+    print("Parsed '1.23e-4': " + parsed.toString())
+    print("Parsed value: " + str(parsed.toDouble()))
+    
+    return 0
