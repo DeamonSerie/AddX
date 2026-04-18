@@ -156,7 +156,7 @@ class ChartRenderer
     renderer: any
 
     def init(rendererType: string, windowHandle: any, width: int, height: int)
-        this.renderer = rendererType
+        renderer = rendererType
 
     def beginFrame()
         pass
@@ -173,10 +173,10 @@ class ChartRenderer
             left: float = mapX(axis.minX, axis, chart, 0.0) + i * barWidth + barWidth * 0.1
             bottom: float = chart.y + chart.height - chart.margin
             
-            this.drawRect(left, bottom - barHeight, scaledWidth, barHeight, item.color, True)
+            drawRect(left, bottom - barHeight, scaledWidth, barHeight, item.color, True)
 
             if chart.showLegend:
-                this.drawText(item.label, left, bottom + 10, 12, axis.textColor)
+                drawText(item.label, left, bottom + 10, 12, axis.textColor)
 
     def drawLineChart(data: list<LineData>, chart: ChartConfig, axis: AxisConfig)
         if len(data) < 2:
@@ -193,15 +193,15 @@ class ChartRenderer
             points.append({x: px, y: py})
 
         for i in range(len(points) - 1):
-            this.drawLine(
+            drawLine(
                 points[i].x, points[i].y,
                 points[i + 1].x, points[i + 1].y,
                 2.0, data[i].color
             )
 
         for i, item in enumerate(data):
-            this.drawCircle(px, py, 5, item.color, True)
-            this.drawText(item.label, points[i].x - 10, points[i].y - 20, 12, axis.textColor)
+            drawCircle(px, py, 5, item.color, True)
+            drawText(item.label, points[i].x - 10, points[i].y - 20, 12, axis.textColor)
 
     def drawPieChart(data: list<PieSlice>, chart: ChartConfig)
         centerX: float = chart.x + chart.width / 2
@@ -220,7 +220,7 @@ class ChartRenderer
         for item in data:
             sweepAngle: float = (item.value / total) * 360.0
 
-            this.drawPieSlice(
+            drawPieSlice(
                 centerX, centerY, radius,
                 startAngle, sweepAngle,
                 item.color
@@ -231,8 +231,8 @@ class ChartRenderer
         if chart.showLegend:
             legendY: float = chart.y + chart.margin
             for item in data:
-                this.drawRect(chart.x + chart.margin, legendY, 20, 20, item.color, True)
-                this.drawText(item.label, chart.x + chart.margin + 30, legendY + 5, 14, chart.titleColor)
+                drawRect(chart.x + chart.margin, legendY, 20, 20, item.color, True)
+                drawText(item.label, chart.x + chart.margin + 30, legendY + 5, 14, chart.titleColor)
                 legendY = legendY + 30
 
     def drawPieSlice(cx: float, cy: float, radius: float, startAngle: float, sweepAngle: float, color: Color)
@@ -248,13 +248,13 @@ class ChartRenderer
             py: float = cy + radius * Math.sin(angle)
             points.append({x: px, y: py})
 
-        this.drawPolygon2D(points, color, True)
+        drawPolygon2D(points, color, True)
 
     def drawScatterPlot(data: list<ScatterPoint>, chart: ChartConfig, axis: AxisConfig)
         for item in data:
             px: float = mapX(item.x, axis, chart, 0.0)
             py: float = mapY(item.y, axis, axis.maxY, 0.0)
-            this.drawCircle(px, py, item.size, item.color, True)
+            drawCircle(px, py, item.size, item.color, True)
 
     def drawAreaChart(data: list<LineData>, chart: ChartConfig, axis: AxisConfig)
         if len(data) < 2:
@@ -274,10 +274,10 @@ class ChartRenderer
 
         points.append({x: chart.margin + graphWidth, y: bottom})
 
-        this.drawPolygon2D(points, data[0].color, True)
+        drawPolygon2D(points, data[0].color, True)
 
         for i in range(len(points) - 1):
-            this.drawLine(points[i + 1].x, points[i + 1].y, points[i + 2].x, points[i + 2].y, 2, data[i].color)
+            drawLine(points[i + 1].x, points[i + 1].y, points[i + 2].x, points[i + 2].y, 2, data[i].color)
 
     def drawHistogram(values: list<float>, bins: int, chart: ChartConfig, axis: AxisConfig)
         if len(values) == 0:
@@ -319,7 +319,7 @@ class ChartRenderer
             bottom: float = chart.y + chart.height - chart.margin
 
             color: Color = Color.Gray(float(i) / float(bins))
-            this.drawRect(left, bottom - scaledHeight, barWidth - 2, scaledHeight, color, True)
+            drawRect(left, bottom - scaledHeight, barWidth - 2, scaledHeight, color, True)
 
     def drawBoxPlot(values: list<float>, chart: ChartConfig, axis: AxisConfig)
         if len(values) == 0:
@@ -344,16 +344,16 @@ class ChartRenderer
         medianY: float = mapY(median, axis, axis.maxY, 0.0)
 
         # Box
-        this.drawRect(centerX - boxWidth / 2, boxTop, boxWidth, boxBottom - boxTop, chart.titleColor, False)
+        drawRect(centerX - boxWidth / 2, boxTop, boxWidth, boxBottom - boxTop, chart.titleColor, False)
 
         # Median line
-        this.drawLine(centerX - boxWidth / 2, medianY, centerX + boxWidth / 2, medianY, 3, Color.Red())
+        drawLine(centerX - boxWidth / 2, medianY, centerX + boxWidth / 2, medianY, 3, Color.Red())
 
         # Whiskers
-        this.drawLine(centerX, boxTop, centerX, whiskerTop, 1, chart.titleColor)
-        this.drawLine(centerX, boxBottom, centerX, whiskerBottom, 1, chart.titleColor)
-        this.drawLine(centerX - boxWidth / 4, whiskerTop, centerX + boxWidth / 4, whiskerTop, 1, chart.titleColor)
-        this.drawLine(centerX - boxWidth / 4, whiskerBottom, centerX + boxWidth / 4, whiskerBottom, 1, chart.titleColor)
+        drawLine(centerX, boxTop, centerX, whiskerTop, 1, chart.titleColor)
+        drawLine(centerX, boxBottom, centerX, whiskerBottom, 1, chart.titleColor)
+        drawLine(centerX - boxWidth / 4, whiskerTop, centerX + boxWidth / 4, whiskerTop, 1, chart.titleColor)
+        drawLine(centerX - boxWidth / 4, whiskerBottom, centerX + boxWidth / 4, whiskerBottom, 1, chart.titleColor)
 
     def drawHeatmap(values: list<float>, width: int, height: int, chart: ChartConfig)
         cellWidth: float = (chart.width - chart.margin * 2) / width
@@ -379,7 +379,7 @@ class ChartRenderer
 
                 px: float = chart.margin + x * cellWidth
                 py: float = chart.margin + y * cellHeight
-                this.drawRect(px, py, cellWidth - 1, cellHeight - 1, color, True)
+                drawRect(px, py, cellWidth - 1, cellHeight - 1, color, True)
 
     def drawSurfacePlot(values: list<float>, width: int, height: int, chart: ChartConfig, axis: AxisConfig)
         cellWidth: float = (chart.width - chart.margin * 2) / width
@@ -405,7 +405,7 @@ class ChartRenderer
 
                 px: float = chart.margin + x * cellWidth
                 py: float = chart.margin + y * cellHeight
-                this.drawRect(px, py, cellWidth, cellHeight, color, True)
+                drawRect(px, py, cellWidth, cellHeight, color, True)
 
     def draw3DBarChart(data: list<BarData>, chart: ChartConfig, axis: AxisConfig)
         barWidth: float = (chart.width - chart.margin * 2) / len(data)
@@ -419,13 +419,13 @@ class ChartRenderer
             bottom: float = chart.y + chart.height - chart.margin
             
             # Front face
-            this.drawRect(left, bottom - barHeight, scaledWidth, barHeight, item.color, True)
+            drawRect(left, bottom - barHeight, scaledWidth, barHeight, item.color, True)
             
             # Top face (fake 3D)
-            this.drawRect(left + depth, bottom - barHeight - depth, scaledWidth, depth, item.color, True)
+            drawRect(left + depth, bottom - barHeight - depth, scaledWidth, depth, item.color, True)
             
             # Side face
-            this.drawRect(left + scaledWidth, bottom - barHeight, depth, barHeight, item.color, True)
+            drawRect(left + scaledWidth, bottom - barHeight, depth, barHeight, item.color, True)
 
     def draw3DLineChart(data: list<LineData>, chart: ChartConfig, axis: AxisConfig)
         if len(data) < 2:
@@ -443,10 +443,10 @@ class ChartRenderer
             z2: float = chart.y + chart.margin + depth
 
             # Back line
-            this.drawLine(x1, y1, x2, y2, 2, data[i].color)
+            drawLine(x1, y1, x2, y2, 2, data[i].color)
             
             # Connection to front
-            this.drawLine(x2, y2, x2, chart.y + chart.height - chart.margin, 1, data[i].color)
+            drawLine(x2, y2, x2, chart.y + chart.height - chart.margin, 1, data[i].color)
 
     def draw3DScatterPlot(data: list<Point3D>, chart: ChartConfig, axis: AxisConfig)
         for point in data:
@@ -454,8 +454,8 @@ class ChartRenderer
             py: float = mapY(point.y, axis, axis.maxY, 0.0)
             pz: float = mapValue(point.z, axis.minY, axis.maxY, chart.margin, chart.height - chart.margin)
 
-            this.drawCircle(px - pz * 0.3, py - pz * 0.3, 5, Color.Gray(0.5), True)
-            this.drawCircle(px, py, 5, Color.Red(), True)
+            drawCircle(px - pz * 0.3, py - pz * 0.3, 5, Color.Gray(0.5), True)
+            drawCircle(px, py, 5, Color.Red(), True)
 
     def drawText(text: string, x: float, y: float, size: float, color: Color)
         pass

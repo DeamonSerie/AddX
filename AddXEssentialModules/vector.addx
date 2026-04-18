@@ -8,125 +8,125 @@ import Math
 # ----------------------------
 class Vector2:
     # Constructor
-    def __init__(self, x: float, y: float):
-        self.x = x
-        self.y = y
+    def __init__(x: float, y: float):
+        x = x
+        y = y
 
     # String representation (for debugging)
-    def to_string(self) -> string:
-        return "Vector2(" + self.x + ", " + self.y + ")"
+    def to_string() -> string:
+        return "Vector2(" + x + ", " + y + ")"
 
     # Vector addition
-    def add(self, other: 'Vector2') -> 'Vector2':
-        return Vector2(self.x + other.x, self.y + other.y)
+    def add(other: 'Vector2') -> 'Vector2':
+        return Vector2(x + other.x, y + other.y)
 
     # Vector subtraction
-    def sub(self, other: 'Vector2') -> 'Vector2':
-        return Vector2(self.x - other.x, self.y - other.y)
+    def sub( other: 'Vector2') -> 'Vector2':
+        return Vector2(x - other.x, y - other.y)
 
     # Scalar multiplication
-    def mul(self, scalar: float) -> 'Vector2':
-        return Vector2(self.x * scalar, self.y * scalar)
+    def mul( scalar: float) -> 'Vector2':
+        return Vector2(x * scalar, y * scalar)
 
     # Dot product
-    def dot(self, other: 'Vector2') -> float:
-        return self.x * other.x + self.y * other.y
+    def dot( other: 'Vector2') -> float:
+        return x * other.x + y * other.y
 
     # Cross product magnitude (2D cross product returns scalar)
-    def cross(self, other: 'Vector2') -> float:
-        return self.x * other.y - self.y * other.x
+    def cross( other: 'Vector2') -> float:
+        return x * other.y - y * other.x
 
     # Length (magnitude)
-    def length(self) -> float:
-        return Math.sqrt(self.x * self.x + self.y * self.y)
+    def length() -> float:
+        return Math.sqrt(x * x + y * y)
 
     # Normalize (return unit vector)
-    def normalize(self) -> 'Vector2':
-        len = self.length()
+    def normalize() -> 'Vector2':
+        len = length()
         if len == 0:
             return Vector2(0, 0)
-        return Vector2(self.x / len, self.y / len)
+        return Vector2(x / len, y / len)
 
     # Distance to another vector
-    def distance(self, other: 'Vector2') -> float:
-        dx = self.x - other.x
-        dy = self.y - other.y
+    def distance( other: 'Vector2') -> float:
+        dx = x - other.x
+        dy = y - other.y
         return Math.sqrt(dx * dx + dy * dy)
 
     # Linear interpolation (lerp) between two vectors
-    def lerp(self, other: 'Vector2', t: float) -> 'Vector2':
-        return Vector2(self.x + (other.x - self.x) * t,
-                       self.y + (other.y - self.y) * t)
+    def lerp( other: 'Vector2', t: float) -> 'Vector2':
+        return Vector2(x + (other.x - x) * t,
+                       y + (other.y - y) * t)
 
 # ----------------------------
 # Vector3 class
 # ----------------------------
 class Vector3:
     # Constructor
-    def __init__(self, x: float, y: float, z: float):
-        self.x = x
-        self.y = y
-        self.z = z
+    def __init__( x: float, y: float, z: float):
+        x = x
+        y = y
+        z = z
 
-    def to_string(self) -> string:
-        return "Vector3(" + self.x + ", " + self.y + ", " + self.z + ")"
+    def to_string() -> string:
+        return "Vector3(" + x + ", " + y + ", " + z + ")"
 
     # Addition
-    def add(self, other: 'Vector3') -> 'Vector3':
-        return Vector3(self.x + other.x, self.y + other.y, self.z + other.z)
+    def add( other: 'Vector3') -> 'Vector3':
+        return Vector3(x + other.x, y + other.y, z + other.z)
 
     # Subtraction
-    def sub(self, other: 'Vector3') -> 'Vector3':
-        return Vector3(self.x - other.x, self.y - other.y, self.z - other.z)
+    def sub( other: 'Vector3') -> 'Vector3':
+        return Vector3(x - other.x, y - other.y, z - other.z)
 
     # Scalar multiplication
-    def mul(self, scalar: float) -> 'Vector3':
-        return Vector3(self.x * scalar, self.y * scalar, self.z * scalar)
+    def mul( scalar: float) -> 'Vector3':
+        return Vector3(x * scalar, y * scalar, z * scalar)
 
     # Dot product
-    def dot(self, other: 'Vector3') -> float:
-        return self.x * other.x + self.y * other.y + self.z * other.z
+    def dot( other: 'Vector3') -> float:
+        return x * other.x + y * other.y + z * other.z
 
     # Cross product (returns Vector3)
-    def cross(self, other: 'Vector3') -> 'Vector3':
-        return Vector3(self.y * other.z - self.z * other.y,
-                       self.z * other.x - self.x * other.z,
-                       self.x * other.y - self.y * other.x)
+    def cross( other: 'Vector3') -> 'Vector3':
+        return Vector3(y * other.z - z * other.y,
+                       z * other.x - x * other.z,
+                       x * other.y - y * other.x)
 
     # Length
-    def length(self) -> float:
-        return Math.sqrt(self.x * self.x + self.y * self.y + self.z * self.z)
+    def length() -> float:
+        return Math.sqrt(x * x + y * y + z * z)
 
     # Normalize
-    def normalize(self) -> 'Vector3':
-        len = self.length()
+    def normalize() -> 'Vector3':
+        len = length()
         if len == 0:
             return Vector3(0, 0, 0)
-        return Vector3(self.x / len, self.y / len, self.z / len)
+        return Vector3(x / len, y / len, z / len)
 
     # Distance
-    def distance(self, other: 'Vector3') -> float:
-        dx = self.x - other.x
-        dy = self.y - other.y
-        dz = self.z - other.z
+    def distance( other: 'Vector3') -> float:
+        dx = x - other.x
+        dy = y - other.y
+        dz = z - other.z
         return Math.sqrt(dx * dx + dy * dy + dz * dz)
 
     # Lerp
-    def lerp(self, other: 'Vector3', t: float) -> 'Vector3':
-        return Vector3(self.x + (other.x - self.x) * t,
-                       self.y + (other.y - self.y) * t,
-                       self.z + (other.z - self.z) * t)
+    def lerp( other: 'Vector3', t: float) -> 'Vector3':
+        return Vector3(x + (other.x - x) * t,
+                       y + (other.y - y) * t,
+                       z + (other.z - z) * t)
 
 # ----------------------------
 # Color class (supports RGB, HSL, CMYK, RGBA/HSLA)
 # ----------------------------
 class Color:
     # Internal storage as RGBA floats 0-1
-    def __init__(self, r: float, g: float, b: float, a: float = 1.0):
-        self.r = Math.max(0.0, Math.min(1.0, r))
-        self.g = Math.max(0.0, Math.min(1.0, g))
-        self.b = Math.max(0.0, Math.min(1.0, b))
-        self.a = Math.max(0.0, Math.min(1.0, a))
+    def __init__( r: float, g: float, b: float, a: float = 1.0):
+        r = Math.max(0.0, Math.min(1.0, r))
+        g = Math.max(0.0, Math.min(1.0, g))
+        b = Math.max(0.0, Math.min(1.0, b))
+        a = Math.max(0.0, Math.min(1.0, a))
 
     # Factory methods
     @staticmethod
@@ -191,15 +191,15 @@ class Color:
             return Color(1, 1, 1, 1)
 
     # Getters
-    def to_rgb(self) -> tuple:
-        return (self.r, self.g, self.b)
+    def to_rgb() -> tuple:
+        return (r, g, b)
 
-    def to_rgba(self) -> tuple:
-        return (self.r, self.g, self.b, self.a)
+    def to_rgba() -> tuple:
+        return (r, g, b, a)
 
-    def to_hsl(self) -> tuple:
+    def to_hsl() -> tuple:
         # Convert RGB to HSL
-        r, g, b = self.r, self.g, self.b
+        r, g, b = r, g, b
         max_val = Math.max(r, Math.max(g, b))
         min_val = Math.min(r, Math.min(g, b))
         delta = max_val - min_val
@@ -219,9 +219,9 @@ class Color:
                 h += 360
         return (h, s, l)
 
-    def to_cmyk(self) -> tuple:
+    def to_cmyk() -> tuple:
         # Convert RGB to CMYK
-        r, g, b = self.r, self.g, self.b
+        r, g, b = r, g, b
         if r == 0 and g == 0 and b == 0:
             return (0, 0, 0, 1)
         c = 1 - r
@@ -235,79 +235,79 @@ class Color:
         y = (y - k) / (1 - k)
         return (c, m, y, k)
 
-    def to_hex(self) -> string:
+    def to_hex() -> string:
         # Returns "#RRGGBB"
-        r_hex = format(int(self.r * 255), '02x')
-        g_hex = format(int(self.g * 255), '02x')
-        b_hex = format(int(self.b * 255), '02x')
+        r_hex = format(int(r * 255), '02x')
+        g_hex = format(int(g * 255), '02x')
+        b_hex = format(int(b * 255), '02x')
         return "#" + r_hex + g_hex + b_hex
 
-    def to_hex_a(self) -> string:
+    def to_hex_a() -> string:
         # Returns "#RRGGBBAA"
-        r_hex = format(int(self.r * 255), '02x')
-        g_hex = format(int(self.g * 255), '02x')
-        b_hex = format(int(self.b * 255), '02x')
-        a_hex = format(int(self.a * 255), '02x')
+        r_hex = format(int(r * 255), '02x')
+        g_hex = format(int(g * 255), '02x')
+        b_hex = format(int(b * 255), '02x')
+        a_hex = format(int(a * 255), '02x')
         return "#" + r_hex + g_hex + b_hex + a_hex
 
-    def to_string(self) -> string:
-        return "Color(RGBA: " + self.r + ", " + self.g + ", " + self.b + ", " + self.a + ")"
+    def to_string() -> string:
+        return "Color(RGBA: " + r + ", " + g + ", " + b + ", " + a + ")"
 
     # Blend colors (alpha blending)
-    def blend(self, other: 'Color') -> 'Color':
+    def blend( other: 'Color') -> 'Color':
         # Source over destination
-        src_a = self.a
+        src_a = a
         dst_a = other.a
         out_a = src_a + dst_a * (1 - src_a)
         if out_a == 0:
             return Color(0, 0, 0, 0)
-        out_r = (self.r * src_a + other.r * dst_a * (1 - src_a)) / out_a
-        out_g = (self.g * src_a + other.g * dst_a * (1 - src_a)) / out_a
-        out_b = (self.b * src_a + other.b * dst_a * (1 - src_a)) / out_a
+        out_r = (r * src_a + other.r * dst_a * (1 - src_a)) / out_a
+        out_g = (g * src_a + other.g * dst_a * (1 - src_a)) / out_a
+        out_b = (b * src_a + other.b * dst_a * (1 - src_a)) / out_a
         return Color(out_r, out_g, out_b, out_a)
 
 # ----------------------------
 # Shader class (simple property container)
 # ----------------------------
 class Shader:
-    def __init__(self, name: string):
-        self.name = name
-        self.properties = {}  # map string -> float/int/color/etc
-        self.textures = {}    # map string -> texture handle (placeholder)
-        self.uniforms = {}    # map string -> value
+    def __init__( name: string):
+        name = name
+        properties = {}  # map string -> float/int/color/etc
+        textures = {}    # map string -> texture handle (placeholder)
+        uniforms = {}    # map string -> value
 
-    def set_float(self, key: string, value: float):
-        self.uniforms[key] = value
+    def set_float( key: string, value: float):
+        uniforms[key] = value
 
-    def set_int(self, key: string, value: int):
-        self.uniforms[key] = value
+    def set_int( key: string, value: int):
+        uniforms[key] = value
 
-    def set_color(self, key: string, color: Color):
-        self.uniforms[key] = color
+    def set_color( key: string, color: Color):
+        uniforms[key] = color
 
-    def set_vector2(self, key: string, vec: Vector2):
-        self.uniforms[key] = vec
+    def set_vector2( key: string, vec: Vector2):
+        uniforms[key] = vec
 
-    def set_vector3(self, key: string, vec: Vector3):
-        self.uniforms[key] = vec
+    def set_vector3( key: string, vec: Vector3):
+        uniforms[key] = vec
 
-    def get_float(self, key: string) -> float:
-        return self.uniforms.get(key, 0.0)
+    def get_float( key: string) -> float:
+        return uniforms.get(key, 0.0)
 
-    def get_int(self, key: string) -> int:
-        return self.uniforms.get(key, 0)
+    def get_int( key: string) -> int:
+        return uniforms.get(key, 0)
 
-    def get_color(self, key: string) -> Color:
-        return self.uniforms.get(key, Color(1, 1, 1, 1))
+    def get_color( key: string) -> Color:
+        return uniforms.get(key, Color(1, 1, 1, 1))
 
-    def get_vector2(self, key: string) -> Vector2:
-        return self.uniforms.get(key, Vector2(0, 0))
+    def get_vector2( key: string) -> Vector2:
+        return uniforms.get(key, Vector2(0, 0))
 
-    def get_vector3(self, key: string) -> Vector3:
-        return self.uniforms.get(key, Vector3(0, 0, 0))
+    def get_vector3( key: string) -> Vector3:
+        return uniforms.get(key, Vector3(0, 0, 0))
 
-    def to_string(self) -> string:
-        return "Shader(" + self.name + ")"
+    def to_string() -> string:
+        return "Shader(" + name + ")"
 
 # ----------------------------
 # LightSource class
@@ -318,28 +318,28 @@ class LightSource:
     POINT = 1
     SPOT = 2
 
-    def __init__(self, light_type: int, position: Vector3, color: Color, intensity: float = 1.0):
-        self.type = light_type
-        self.position = position
-        self.color = color
-        self.intensity = intensity
+    def __init__( light_type: int, position: Vector3, color: Color, intensity: float = 1.0):
+        type = light_type
+        position = position
+        color = color
+        intensity = intensity
         # For spot lights
-        self.direction = Vector3(0, 0, -1)  # default pointing down
-        self.cutoff = Math.cos(Math.radians(30))  # default 30-degree cone
-        self.exponent = 10.0
+        direction = Vector3(0, 0, -1)  # default pointing down
+        cutoff = Math.cos(Math.radians(30))  # default 30-degree cone
+        exponent = 10.0
 
-    def set_direction(self, dir: Vector3):
-        self.direction = dir.normalize()
+    def set_direction( dir: Vector3):
+        direction = dir.normalize()
 
-    def set_spot_cutoff(self, angle_degrees: float):
-        self.cutoff = Math.cos(Math.radians(angle_degrees))
+    def set_spot_cutoff( angle_degrees: float):
+        cutoff = Math.cos(Math.radians(angle_degrees))
 
-    def set_spot_exponent(self, exponent: float):
-        self.exponent = exponent
+    def set_spot_exponent( exponent: float):
+        exponent = exponent
 
-    def to_string(self) -> string:
+    def to_string() -> string:
         type_names = ["Directional", "Point", "Spot"]
-        return "Light(" + type_names[self.type] + ")"
+        return "Light(" + type_names[type] + ")"
 
 # ----------------------------
 # Utility functions for vector math and collisions

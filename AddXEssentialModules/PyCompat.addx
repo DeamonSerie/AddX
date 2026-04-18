@@ -31,18 +31,18 @@ def insert(list_: list<any>, index: int, item: any) -> list<any>
     end
     
     newList = []
-    for i in range(index) do
+    for i in range(index)
         newList.append(list_[i])
     end
     newList.append(item)
-    for i in range(index, len(list_)) do
+    for i in range(index, len(list_))
         newList.append(list_[i])
     end
     
     return newList
 
 def remove(list_: list<any>, item: any) -> bool
-    for i in range(len(list_)) do
+for i in range(len(list_))
         if list_[i] == item then
             list_.remove(i)
             return true
@@ -51,13 +51,13 @@ def remove(list_: list<any>, item: any) -> bool
     return false
 
 def extend(list1: list<any>, list2: list<any>) -> list<any>
-    for item in list2 do
+    for item in list2
         list1.append(item)
     end
     return list1
 
 def index(list_: list<any>, item: any) -> int
-    for i in range(len(list_)) do
+    for i in range(len(list_))
         if list_[i] == item then
             return i
         end
@@ -66,7 +66,7 @@ def index(list_: list<any>, item: any) -> int
 
 def count(list_: list<any>, item: any) -> int
     c = 0
-    for i in range(len(list_)) do
+    for i in range(len(list_))
         if list_[i] == item then
             c = c + 1
         end
@@ -74,10 +74,9 @@ def count(list_: list<any>, item: any) -> int
     return c
 
 def sort(list_: list<any>) -> list<any>
-    # Bubble sort for demonstration
     n = len(list_)
-    for i in range(n) do
-        for j in range(0, n - i - 1) do
+    for i in range(n)
+        for j in range(0, n - i - 1)
             if list_[j] > list_[j + 1] then
                 temp = list_[j]
                 list_[j] = list_[j + 1]
@@ -89,20 +88,20 @@ def sort(list_: list<any>) -> list<any>
 
 def reverse(list_: list<any>) -> list<any>
     newList = []
-    for i in range(len(list_) - 1, -1, -1) do
+    for i in range(len(list_) - 1, -1, -1) 
         newList.append(list_[i])
     end
     return newList
 
 def clear(list_: list<any>) -> list<any>
-    while len(list_) > 0 do
+    while len(list_) > 0 
         list_.pop()
     end
     return list_
 
 def copy(list_: list<any>) -> list<any>
     newList = []
-    for item in list_ do
+    for item in list_ 
         newList.append(item)
     end
     return newList
@@ -122,7 +121,7 @@ def dictValues(d: dict<string, any>) -> list<any>
 
 def dictItems(d: dict<string, any>) -> list<tuple<string, any>>
     result = []
-    for key in d.keys() do
+    for key in d.keys() 
         result.append((key, d[key]))
     end
     return result
@@ -136,13 +135,13 @@ def dictPop(d: dict<string, any>, key: string, default: any = nothing) -> any
 
 def dictClear(d: dict<string, any>) -> dict<string, any>
     keys = d.keys()
-    for key in keys do
+    for key in keys 
         d.remove(key)
     end
     return d
 
 def dictUpdate(d: dict<string, any>, other: dict<string, any>) -> dict<string, any>
-    for key in other.keys() do
+    for key in other.keys() 
         d[key] = other[key]
     end
     return d
@@ -177,7 +176,7 @@ def minList(list_: list<int>) -> int
         return 0
     end
     minVal = list_[0]
-    for i in range(1, len(list_)) do
+    for i in range(1, len(list_)) 
         if list_[i] < minVal then
             minVal = list_[i]
         end
@@ -189,7 +188,7 @@ def maxList(list_: list<int>) -> int
         return 0
     end
     maxVal = list_[0]
-    for i in range(1, len(list_)) do
+    for i in range(1, len(list_)) 
         if list_[i] > maxVal then
             maxVal = list_[i]
         end
@@ -198,7 +197,7 @@ def maxList(list_: list<int>) -> int
 
 def pow(base: int, exp: int) -> int
     result = 1
-    for i in range(exp) do
+    for i in range(exp) 
         result = result * base
     end
     return result
@@ -207,7 +206,7 @@ def powFloat(base: float, exp: float) -> float
     # Simple approximation
     result = 1.0
     if exp > 0 then
-        for i in range(exp) do
+        for i in range(exp) 
             result = result * base
         end
     elif exp < 0 then
@@ -236,7 +235,7 @@ def round_(n: float) -> int
 
 def enumerate(list_: list<any>) -> list<tuple<int, any>>
     result = []
-    for i in range(len(list_)) do
+    for i in range(len(list_)) 
         result.append((i, list_[i]))
     end
     return result
@@ -244,21 +243,21 @@ def enumerate(list_: list<any>) -> list<tuple<int, any>>
 def zip(list1: list<any>, list2: list<any>) -> list<tuple<any, any>>
     result = []
     minLen = min2(len(list1), len(list2))
-    for i in range(minLen) do
+    for i in range(minLen) 
         result.append((list1[i], list2[i]))
     end
     return result
 
 def map(list_: list<any>, func: (any) -> any) -> list<any>
     result = []
-    for item in list_ do
+    for item in list_ 
         result.append(func(item))
     end
     return result
 
 def filter(list_: list<any>, func: (any) -> bool) -> list<any>
     result = []
-    for item in list_ do
+    for item in list_ 
         if func(item) then
             result.append(item)
         end
@@ -266,7 +265,7 @@ def filter(list_: list<any>, func: (any) -> bool) -> list<any>
     return result
 
 def any(list_: list<bool>) -> bool
-    for item in list_ do
+    for item in list_ 
         if item then
             return true
         end
@@ -274,7 +273,7 @@ def any(list_: list<bool>) -> bool
     return false
 
 def all(list_: list<bool>) -> bool
-    for item in list_ do
+    for item in list_ 
         if not item then
             return false
         end
@@ -283,14 +282,14 @@ def all(list_: list<bool>) -> bool
 
 def sum(list_: list<int>) -> int
     total = 0
-    for item in list_ do
+    for item in list_ 
         total = total + item
     end
     return total
 
 def product(list_: list<int>) -> int
     total = 1
-    for item in list_ do
+    for item in list_ 
         total = total * item
     end
     return total
@@ -344,7 +343,7 @@ def ljust(s: string, width: int) -> string
         return s
     end
     result = s
-    for i in range(diff) do
+    for i in range(diff) 
         result = result + " "
     end
     return result
@@ -355,7 +354,7 @@ def rjust(s: string, width: int) -> string
         return s
     end
     result = ""
-    for i in range(diff) do
+    for i in range(diff) 
         result = result + " "
     end
     result = result + s
@@ -367,7 +366,7 @@ def zfill(s: string, width: int) -> string
         return s
     end
     result = ""
-    for i in range(diff) do
+    for i in range(diff) 
         result = result + "0"
     end
     result = result + s
@@ -385,13 +384,13 @@ def range_(start: int, stop: int = -1, step: int = 1) -> list<int>
     
     if step > 0 then
         i = start
-        while i < stop do
+        while i < stop 
             result.append(i)
             i = i + step
         end
     elif step < 0 then
         i = start
-        while i > stop do
+        while i > stop 
             result.append(i)
             i = i + step
         end

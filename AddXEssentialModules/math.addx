@@ -182,7 +182,7 @@ class Math:
         return (seed * 1103515245 + 12345) % 2147483648 / 2147483648.0
     
     def randint(minVal: int, maxVal: int) -> int
-        return toInt(this.random() * (maxVal - minVal + 1)) + minVal
+        return toInt(random() * (maxVal - minVal + 1)) + minVal
     
     # Factorial and combinatorics
     def factorial(n: int) -> int:

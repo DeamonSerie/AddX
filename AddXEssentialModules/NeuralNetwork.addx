@@ -14,52 +14,52 @@ class Layer
     activation: string
     
     def init(inputSize: int, outputSize: int, activation: string = "relu")
-        this.inputSize = inputSize
-        this.outputSize = outputSize
-        this.activation = activation
+        inputSize = inputSize
+        outputSize = outputSize
+        activation = activation
         
-        this.weights = []
+        weights = []
         for i in range(inputSize)
             row = []
             for j in range(outputSize) 
                 row.append(Math.ranm() * 2.0 - 1.0)
             end
-            this.weights.append(row)
+            weights.append(row)
         end
         
-        this.biases = []
+        biases = []
         for i in range(outputSize) 
-            this.biases.append(Math.ranm() * 2.0 - 1.0)
+            biases.append(Math.ranm() * 2.0 - 1.0)
         end
     
     def forward(inputs: list<float>) -> list<float>
         outputs = []
         
-        for j in range(this.outputSize) 
-            sum_ = this.biases[j]
-            for i in range(this.inputSize) 
-                sum_ = sum_ + inputs[i] * this.weights[i][j]
+        for j in range(outputSize) 
+            sum_ = biases[j]
+            for i in range(inputSize) 
+                sum_ = sum_ + inputs[i] * weights[i][j]
             end
-            outputs.append(this.activate(sum_))
+            outputs.append(activate(sum_))
         end
         
         return outputs
     
     def activate(x: float) -> float
-        if this.activation == "sigmoid" then
+        if activation == "sigmoid" then
             return 1.0 / (1.0 + Math.exp(-x))
-        elif this.activation == "tanh" then
+        elif activation == "tanh" then
             return Math.tanh(x)
-        elif this.activation == "softmax" then
+        elif activation == "softmax" then
             return x
         else
             return Math.max(0, x)
     
     def activateDeriv(x: float) -> float
-        if this.activation == "sigmoid" then
-            sig = this.activate(x)
+        if activation == "sigmoid" then
+            sig = activate(x)
             return sig * (1.0 - sig)
-        elif this.activation == "tanh" then
+        elif activation == "tanh" then
             return 1.0 - Math.pow(Math.tanh(x), 2.0)
         else
             if x > 0 then
@@ -72,23 +72,23 @@ class NeuralNetwork
     learningRate: float
     
     def init(layerSizes: list<int>, learningRate: float = 0.01)
-        this.learningRate = learningRate
-        this.layers = []
+        learningRate = learningRate
+        layers = []
         
         for i in range(len(layerSizes) - 1) 
             layer = Layer.new(layerSizes[i], layerSizes[i + 1], "relu")
-            this.layers.append(layer)
+            layers.append(layer)
     
     def forward(inputs: list<float>) -> list<float>
         current = inputs
         
-        for layer in this.layers 
+        for layer in layers 
             current = layer.forward(current)
         
         return current
     
     def predict(inputs: list<float>) -> int
-        outputs = this.forward(inputs)
+        outputs = forward(inputs)
         
         maxIdx = 0
         maxVal = outputs[0]
@@ -101,46 +101,46 @@ class NeuralNetwork
         return maxIdx
     
     def train(inputs: list<float>, targets: list<float>)
-        outputs = this.forward(inputs)
+        outputs = forward(inputs)
         
         deltas = []
-        for i in range(len(this.layers) - 1, -1, -1) 
-            layer = this.layers[i]
+        for i in range(len(layers) - 1, -1, -1) 
+            layer = layers[i]
             
             layerDeltas = []
             
-            if i == len(this.layers) - 1 then
+            if i == len(layers) - 1 then
                 for j in range(layer.outputSize) 
                     error = targets[j] - outputs[j]
-                    delta = error * layer.activateDeriv(this.getLayerOutput(i, j))
+                    delta = error * layer.activateDeriv(getLayerOutput(i, j))
                     layerDeltas.append(delta)
                 end
             else
-                nextLayer = this.layers[i + 1]
+                nextLayer = layers[i + 1]
                 for j in range(layer.outputSize) 
                     error = 0.0
                     for k in range(nextLayer.outputSize) 
                         error = error + nextLayer.deltas[k] * nextLayer.weights[j][k]
                     end
-                    delta = error * layer.activateDeriv(this.getLayerOutput(i, j))
+                    delta = error * layer.activateDeriv(getLayerOutput(i, j))
                     layerDeltas.append(delta)
                 end
             
             deltas.insert(0, layerDeltas)
         
-        this.layers[-1].deltas = deltas[len(deltas) - 1]
+        layers[-1].deltas = deltas[len(deltas) - 1]
         
-        for i in range(len(this.layers)) 
-            layer = this.layers[i]
+        for i in range(len(layers)) 
+            layer = layers[i]
             
             for j in range(layer.inputSize) 
                 for k in range(layer.outputSize) 
-                    layer.weights[j][k] = layer.weights[j][k] + this.learningRate * deltas[i][k] * this.getLayerInput(i, j)
+                    layer.weights[j][k] = layer.weights[j][k] + learningRate * deltas[i][k] * getLayerInput(i, j)
                 end
             end
             
             for k in range(layer.outputSize) 
-                layer.biases[k] = layer.biases[k] + this.learningRate * deltas[i][k]
+                layer.biases[k] = layer.biases[k] + learningRate * deltas[i][k]
             end
     
     def getLayerOutput(layerIdx: int, neuronIdx: int) -> float
@@ -148,9 +148,9 @@ class NeuralNetwork
             return 0.0
         end
         
-        sum_ = this.layers[layerIdx].biases[neuronIdx]
-        for i in range(this.layers[layerIdx - 1].inputSize) 
-            sum_ = sum_ + this.getLayerInput(layerIdx, i) * this.layers[layerIdx - 1].weights[i][neuronIdx]
+        sum_ = layers[layerIdx].biases[neuronIdx]
+        for i in range(layers[layerIdx - 1].inputSize) 
+            sum_ = sum_ + getLayerInput(layerIdx, i) * layers[layerIdx - 1].weights[i][neuronIdx]
         end
         return sum_
     
@@ -180,7 +180,7 @@ class Activation
         return 1.0 / (1.0 + Math.exp(-x))
     
     def sigmoidDeriv(x: float) -> float
-        s = this.sigmoid(x)
+        s = sigmoid(x)
         return s * (1.0 - s)
     
     def relu(x: float) -> float

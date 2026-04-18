@@ -10,7 +10,7 @@ def split(s: string, delimiter: string = " ") -> list<string>
     result = []
     current = ""
     
-    for i in range(len(s)) do
+    for i in range(len(s))
         char = s[i]
         
         if len(delimiter) == 1 then
@@ -41,7 +41,7 @@ def split(s: string, delimiter: string = " ") -> list<string>
 
 def join(list_: list<string>, separator: string = "") -> string
     result = ""
-    for i in range(len(list_)) do
+    for i in range(len(list_))
         result = result + list_[i]
         if i < len(list_) - 1 then
             result = result + separator
@@ -61,7 +61,7 @@ def substring(s: string, start: int, end: int) -> string
         return ""
     end
     
-    for i in range(start, end) do
+    for i in range(start, end)
         result = result + s[i]
     end
     return result
@@ -70,7 +70,7 @@ def trim(s: string) -> string
     start = 0
     end = len(s)
     
-    while start < end do
+    while start < end
         ch = s[start]
         if ch == " " or ch == "\t" or ch == "\n" or ch == "\r" then
             start = start + 1
@@ -79,7 +79,7 @@ def trim(s: string) -> string
         end
     end
     
-    while end > start do
+    while end > start
         ch = s[end - 1]
         if ch == " " or ch == "\t" or ch == "\n" or ch == "\r" then
             end = end - 1
@@ -92,7 +92,7 @@ def trim(s: string) -> string
 
 def upper(s: string) -> string
     result = ""
-    for i in range(len(s)) do
+    for i in range(len(s))
         ch = s[i]
         code = ord(ch)
         if code >= 97 and code <= 122 then
@@ -105,7 +105,7 @@ def upper(s: string) -> string
 
 def lower(s: string) -> string
     result = ""
-    for i in range(len(s)) do
+    for i in range(len(s))
         ch = s[i]
         code = ord(ch)
         if code >= 65 and code <= 90 then
@@ -120,10 +120,10 @@ def replace(s: string, old: string, new: string) -> string
     result = ""
     i = 0
     
-    while i < len(s) do
+    while i < len(s)
         found = true
         if i + len(old) <= len(s) then
-            for j in range(len(old)) do
+            for j in range(len(old))
                 if s[i + j] != old[j] then
                     found = false
                     break
@@ -149,7 +149,7 @@ def startsWith(s: string, prefix: string) -> bool
         return false
     end
     
-    for i in range(len(prefix)) do
+    for i in range(len(prefix))
         if s[i] != prefix[i] then
             return false
         end
@@ -162,7 +162,7 @@ def endsWith(s: string, suffix: string) -> bool
     end
     
     offset = len(s) - len(suffix)
-    for i in range(len(suffix)) do
+    for i in range(len(suffix))
         if s[offset + i] != suffix[i] then
             return false
         end
@@ -177,9 +177,9 @@ def find(s: string, substr: string, start: int = 0) -> int
         start = 0
     end
     
-    for i in range(start, len(s) - len(substr) + 1) do
+    for i in range(start, len(s) - len(substr) + 1)
         found = true
-        for j in range(len(substr)) do
+        for j in range(len(substr))
             if s[i + j] != substr[j] then
                 found = false
                 break
@@ -193,9 +193,9 @@ def find(s: string, substr: string, start: int = 0) -> int
     return -1
 
 def rfind(s: string, substr: string) -> int
-    for i in range(len(s) - len(substr), -1, -1) do
+    for i in range(len(s) - len(substr), -1, -1)
         found = true
-        for j in range(len(substr)) do
+        for j in range(len(substr))
             if s[i + j] != substr[j] then
                 found = false
                 break
@@ -211,9 +211,9 @@ def count(s: string, substr: string) -> int
     count = 0
     pos = 0
     
-    while pos <= len(s) - len(substr) do
+    while pos <= len(s) - len(substr)
         found = true
-        for i in range(len(substr)) do
+        for i in range(len(substr))
             if s[pos + i] != substr[i] then
                 found = false
                 break
@@ -234,7 +234,7 @@ def isAlpha(s: string) -> bool
         return false
     end
     
-    for i in range(len(s)) do
+    for i in range(len(s))
         ch = s[i]
         code = ord(ch)
         if not ((code >= 65 and code <= 90) or (code >= 97 and code <= 122)) then
@@ -248,7 +248,7 @@ def isDigit(s: string) -> bool
         return false
     end
     
-    for i in range(len(s)) do
+    for i in range(len(s))
         ch = s[i]
         code = ord(ch)
         if not (code >= 48 and code <= 57) then
@@ -262,7 +262,7 @@ def isSpace(s: string) -> bool
         return false
     end
     
-    for i in range(len(s)) do
+    for i in range(len(s))
         ch = s[i]
         if ch != " " and ch != "\t" and ch != "\n" and ch != "\r" then
             return false
@@ -275,7 +275,7 @@ def isAlnum(s: string) -> bool
         return false
     end
     
-    for i in range(len(s)) do
+    for i in range(len(s))
         ch = s[i]
         code = ord(ch)
         if not ((code >= 65 and code <= 90) or (code >= 97 and code <= 122) or (code >= 48 and code <= 57)) then
@@ -300,7 +300,7 @@ def title(s: string) -> string
     result = ""
     capitalizeNext = true
     
-    for i in range(len(s)) do
+    for i in range(len(s))
         ch = s[i]
         if capitalizeNext then
             result = result + upper(ch)
@@ -324,7 +324,7 @@ def ljust(s: string, width: int, fill: string = " ") -> string
     result = s
     diff = width - len(s)
     
-    for i in range(diff) do
+    for i in range(diff)
         result = result + fill
     end
     
@@ -338,7 +338,7 @@ def rjust(s: string, width: int, fill: string = " ") -> string
     diff = width - len(s)
     result = ""
     
-    for i in range(diff) do
+    for i in range(diff)
         result = result + fill
     end
     
@@ -355,13 +355,13 @@ def center(s: string, width: int, fill: string = " ") -> string
     right = diff - left
     result = ""
     
-    for i in range(left) do
+    for i in range(left)
         result = result + fill
     end
     
     result = result + s
     
-    for i in range(right) do
+    for i in range(right)
         result = result + fill
     end
     
@@ -370,7 +370,7 @@ def center(s: string, width: int, fill: string = " ") -> string
 def lstrip(s: string) -> string
     start = 0
     
-    while start < len(s) do
+    while start < len(s)
         ch = s[start]
         if ch == " " or ch == "\t" or ch == "\n" or ch == "\r" then
             start = start + 1
@@ -384,7 +384,7 @@ def lstrip(s: string) -> string
 def rstrip(s: string) -> string
     end = len(s)
     
-    while end > 0 do
+    while end > 0
         ch = s[end - 1]
         if ch == " " or ch == "\t" or ch == "\n" or ch == "\r" then
             end = end - 1
@@ -399,7 +399,7 @@ def splitlines(s: string) -> list<string>
     result = []
     current = ""
     
-    for i in range(len(s)) do
+    for i in range(len(s))
         ch = s[i]
         
         if ch == "\n" then
@@ -427,7 +427,7 @@ def zfill(s: string, width: int) -> string
     diff = width - len(s)
     result = ""
     
-    for i in range(diff) do
+    for i in range(diff)
         result = result + "0"
     end
     
@@ -446,7 +446,7 @@ def format(template: string, args: list<string>) -> string
     result = ""
     i = 0
     
-    while i < len(template) do
+    while i < len(template)
         if template[i] == "{" then
             end = find(template, "}", i)
             if end != -1 then

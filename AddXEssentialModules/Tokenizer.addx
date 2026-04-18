@@ -12,13 +12,13 @@ class Token
     column: int
 
     def init(tokenType: string, tokenValue: string, lineNum: int, colNum: int)
-        this.type = tokenType
-        this.value = tokenValue
-        this.line = lineNum
-        this.column = colNum
+        type = tokenType
+        value = tokenValue
+        line = lineNum
+        column = colNum
     
     def toString(): string
-        return "Token(" + this.type + ", \"" + this.value + "\", " + str(this.line) + ":" + str(this.column) + ")"
+        return "Token(" + type + ", \"" + value + "\", " + str(line) + ":" + str(column) + ")"
 
 class TokenType
     EOF: string = "EOF"
@@ -40,78 +40,78 @@ class Tokenizer
     tokens: list<Token>
 
     def init(source: string)
-        this.input = source
-        this.position = 0
-        this.line = 1
-        this.column = 1
-        this.tokens = []
+        input = source
+        position = 0
+        line = 1
+        column = 1
+        tokens = []
 
     def tokenize(): list<Token>
-        while this.position < len(this.input) then
-            ch = this.input[this.position]
+        while position < len(input) then
+            ch = input[position]
             
             if ch == " " or ch == "\t" or ch == "\r" then
-                this.skipWhitespace()
+                skipWhitespace()
             elif ch == "\n" then
-                this.line = this.line + 1
-                this.column = 1
-                this.position = this.position + 1
+                line = line + 1
+                column = 1
+                position = position + 1
             elif ch >= "0" and ch <= "9" then
-                this.readNumber()
+                readNumber()
             elif (ch >= "a" and ch <= "z") or (ch >= "A" and ch <= "Z") or ch == "_" then
-                this.readIdentifier()
+                readIdentifier()
             elif ch == "\"" or ch == "'" then
-                this.readString(ch)
+                readString(ch)
             elif "+-*/%=<>!&|^~" then
-                this.readOperator()
+                readOperator()
             else
-                this.readPunctuation()
+                readPunctuation()
         
-        this.tokens.append(Token(TokenType.EOF, "", this.line, this.column))
-        return this.tokens
+        tokens.append(Token(TokenType.EOF, "", line, column))
+        return tokens
 
     def skipWhitespace()
-        while this.position < len(this.input) then
-            ch = this.input[this.position]
+        while position < len(input) then
+            ch = input[position]
             if ch == " " or ch == "\t" or ch == "\r" then
-                this.position = this.position + 1
-                this.column = this.column + 1
+                position = position + 1
+                column = column + 1
             else
                 break
 
     def readNumber()
-        start = this.position
-        startCol = this.column
+        start = position
+        startCol = column
         hasDot = false
         
-        while this.position < len(this.input) then
-            ch = this.input[this.position]
+        while position < len(input) then
+            ch = input[position]
             if ch >= "0" and ch <= "9" then
-                this.position = this.position + 1
-                this.column = this.column + 1
+                position = position + 1
+                column = column + 1
             elif ch == "." and not hasDot then
                 hasDot = true
-                this.position = this.position + 1
-                this.column = this.column + 1
+                position = position + 1
+                column = column + 1
             else
                 break
         
-        value = substring(this.input, start, this.position)
-        this.tokens.append(Token(TokenType.NUMBER, value, this.line, startCol))
+        value = substring(input, start, position)
+        tokens.append(Token(TokenType.NUMBER, value, line, startCol))
 
     def readIdentifier()
-        start = this.position
-        startCol = this.column
+        start = position
+        startCol = column
         
-        while this.position < len(this.input) then
-            ch = this.input[this.position]
+        while position < len(input) then
+            ch = input[position]
             if (ch >= "a" and ch <= "z") or (ch >= "A" and ch <= "Z") or (ch >= "0" and ch <= "9") or ch == "_" then
-                this.position = this.position + 1
-                this.column = this.column + 1
+                position = position + 1
+                column = column + 1
             else
                 break
         
-        value = substring(this.input, start, this.position)
+        value = substring(input, start, position)
         
         keywords = ["if", "else", "while", "for", "def", "return", "class", "import", "True", "False", "None"]
         tokenType = TokenType.IDENTIFIER
@@ -121,30 +121,30 @@ class Tokenizer
                 tokenType = TokenType.KEYWORD
                 break
         
-        this.tokens.append(Token(tokenType, value, this.line, startCol))
+        tokens.append(Token(tokenType, value, line, startCol))
 
     def readString(quote: string)
-        start = this.position
-        startCol = this.column
-        this.position = this.position + 1
-        this.column = this.column + 1
+        start = position
+        startCol = column
+        position = position + 1
+        column = column + 1
         
         value = ""
         
-        while this.position < len(this.input) then
-            ch = this.input[this.position]
+        while position < len(input) then
+            ch = input[position]
             
             if ch == quote then
-                this.position = this.position + 1
-                this.column = this.column + 1
-                this.tokens.append(Token(TokenType.STRING, value, this.line, startCol))
+                position = position + 1
+                column = column + 1
+                tokens.append(Token(TokenType.STRING, value, line, startCol))
                 return
             elif ch == "\n" then
                 break
             elif ch == "\\" then
-                this.position = this.position + 1
-                if this.position < len(this.input) then
-                    nextCh = this.input[this.position]
+                position = position + 1
+                if position < len(input) then
+                    nextCh = input[position]
                     if nextCh == "n" then
                         value = value + "\n"
                     elif nextCh == "t" then
@@ -155,52 +155,52 @@ class Tokenizer
                         value = value + quote
                     else
                         value = value + nextCh
-                    this.position = this.position + 1
-                    this.column = this.column + 1
+                    position = position + 1
+                    column = column + 1
             else
                 value = value + ch
-                this.position = this.position + 1
-                this.column = this.column + 1
+                position = position + 1
+                column = column + 1
         
-        this.tokens.append(Token(TokenType.STRING, value, this.line, startCol))
+        tokens.append(Token(TokenType.STRING, value, line, startCol))
 
     def readOperator()
-        start = this.position
-        startCol = this.column
-        ch = this.input[this.position]
+        start = position
+        startCol = column
+        ch = input[position]
         
         twoChar = ["==", "!=", "<=", ">=", "&&", "||", "++", "--", "+=", "-=", "*=", "/=", "<<", ">>", "->", "::"]
         
-        if this.position + 1 < len(this.input) then
-            two = ch + this.input[this.position + 1]
+        if position + 1 < len(input) then
+            two = ch + input[position + 1]
             for op in twoChar:
                 if two == op then
-                    this.position = this.position + 2
-                    this.column = this.column + 2
-                    this.tokens.append(Token(TokenType.OPERATOR, two, this.line, startCol))
+                    position = position + 2
+                    column = column + 2
+                    tokens.append(Token(TokenType.OPERATOR, two, line, startCol))
                     return
         
-        this.position = this.position + 1
-        this.column = this.column + 1
-        this.tokens.append(Token(TokenType.OPERATOR, ch, this.line, startCol))
+        position = position + 1
+        column = column + 1
+        tokens.append(Token(TokenType.OPERATOR, ch, line, startCol))
 
     def readPunctuation()
-        start = this.position
-        startCol = this.column
-        ch = this.input[this.position]
+        start = position
+        startCol = column
+        ch = input[position]
         
         punct = "(){}[]:,;."
         
         for p in punct:
             if ch == p then
-                this.position = this.position + 1
-                this.column = this.column + 1
-                this.tokens.append(Token(TokenType.PUNCTUATION, ch, this.line, startCol))
+                position = position + 1
+                column = column + 1
+                tokens.append(Token(TokenType.PUNCTUATION, ch, line, startCol))
                 return
         
-        this.position = this.position + 1
-        this.column = this.column + 1
-        this.tokens.append(Token(TokenType.UNKNOWN, ch, this.line, startCol))
+        position = position + 1
+        column = column + 1
+        tokens.append(Token(TokenType.UNKNOWN, ch, line, startCol))
 
 # === Utility Functions ===
 

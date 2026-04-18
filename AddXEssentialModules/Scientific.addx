@@ -11,57 +11,57 @@ class ScientificFloat
     exponent: int
     
     def init(significand: float, exponent: int)
-        this.significand = significand
-        this.exponent = exponent
-        this.normalize()
+        significand = significand
+        exponent = exponent
+        normalize()
     
     def normalize()
-        if this.significand == 0.0 then
-            this.exponent = 0
+        if significand == 0.0 then
+            exponent = 0
             return
         
-        while Math.abs(this.significand) >= 10.0 do
-            this.significand = this.significand / 10.0
-            this.exponent = this.exponent + 1
+        while Math.abs(significand) >= 10.0
+            significand = significand / 10.0
+            exponent = exponent + 1
         
-        while Math.abs(this.significand) < 1.0 do
-            this.significand = this.significand * 10.0
-            this.exponent = this.exponent - 1
+        while Math.abs(significand) < 1.0
+            significand = significand * 10.0
+            exponent = exponent - 1
     
     def toString() -> string
-        return str(this.significand) + "e" + str(this.exponent)
+        return str(significand) + "e" + str(exponent)
     
     def toDouble() -> float
-        return this.significand * Math.pow(10.0, this.exponent)
+        return significand * Math.pow(10.0, exponent)
     
     def add(other: ScientificFloat) -> ScientificFloat
-        if this.exponent >= other.exponent then
-            adjusted = other.significand * Math.pow(10.0, other.exponent - this.exponent)
-            return ScientificFloat.new(this.significand + adjusted, this.exponent)
+        if exponent >= other.exponent then
+            adjusted = other.significand * Math.pow(10.0, other.exponent - exponent)
+            return ScientificFloat.new(significand + adjusted, exponent)
         else
-            adjusted = this.significand * Math.pow(10.0, this.exponent - other.exponent)
+            adjusted = significand * Math.pow(10.0, exponent - other.exponent)
             return ScientificFloat.new(other.significand + adjusted, other.exponent)
     
     def subtract(other: ScientificFloat) -> ScientificFloat
-        if this.exponent >= other.exponent then
-            adjusted = other.significand * Math.pow(10.0, other.exponent - this.exponent)
-            return ScientificFloat.new(this.significand - adjusted, this.exponent)
+        if exponent >= other.exponent then
+            adjusted = other.significand * Math.pow(10.0, other.exponent - exponent)
+            return ScientificFloat.new(significand - adjusted, exponent)
         else
-            adjusted = this.significand * Math.pow(10.0, this.exponent - other.exponent)
+            adjusted = significand * Math.pow(10.0, exponent - other.exponent)
             return ScientificFloat.new(other.significand - adjusted, other.exponent)
     
     def multiply(other: ScientificFloat) -> ScientificFloat
         return ScientificFloat.new(
-            this.significand * other.significand,
-            this.exponent + other.exponent
+            significand * other.significand,
+            exponent + other.exponent
         )
     
     def divide(other: ScientificFloat) -> ScientificFloat
         if other.significand == 0.0 then
             return ScientificFloat.new(0.0, 0)
         return ScientificFloat.new(
-            this.significand / other.significand,
-            this.exponent - other.exponent
+            significand / other.significand,
+            exponent - other.exponent
         )
 
 # === Parsing ===
@@ -72,7 +72,7 @@ def parseScientific(s: string) -> ScientificFloat
     hasE = false
     ePos = 0
     
-    for i in range(len(s)) do
+    for i in range(len(s))
         if s[i] == "e" or s[i] == "E" then
             hasE = true
             ePos = i
@@ -103,11 +103,11 @@ def toScientific(val: float, precision: int = 6) -> ScientificFloat
     exp = 0
     
     if Math.abs(val) >= 10.0 then
-        while Math.abs(val) >= 10.0 do
+        while Math.abs(val) >= 10.0
             val = val / 10.0
             exp = exp + 1
     elif Math.abs(val) < 1.0 then
-        while Math.abs(val) < 1.0 do
+        while Math.abs(val) < 1.0
             val = val * 10.0
             exp = exp - 1
     

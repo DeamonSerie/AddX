@@ -56,7 +56,7 @@ def validateAssembly(source: string) -> tuple<bool, list<string>>
     errors = []
     
     lines = source.split("\n")
-    for i in range(len(lines)) do
+    for i in range(len(lines))
         line = lines[i].trim()
         
         if line.startsWith(";") or line == "" then
@@ -77,14 +77,14 @@ def formatAssembly(source: string) -> string
     lines = source.split("\n")
     formatted = ""
     
-    for line in lines do
+    for line in lines
         line = line.trim()
         
         if line.startsWith(";") then
             formatted = formatted + "; " + line.substring(1).trim() + "\n"
-        elif line == "" then
+        if line == "" then
             formatted = formatted + "\n"
-        elif line.contains(":") then
+        if line.contains(":") then
             parts = line.split(":")
             label = parts[0].trim()
             formatted = formatted + label + ":\n"

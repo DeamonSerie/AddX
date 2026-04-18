@@ -15,37 +15,37 @@ class BigInt
     
     def init(value: int = 0)
         if value < 0:
-            this.sign = -1
+            sign = -1
             value = -value
         else:
-            this.sign = 1
+            sign = 1
         
-        this.digits = []
+        digits = []
         
         while value > 0:
-            this.digits.append(value % 1000000000)
+            digits.append(value % 1000000000)
             value = value / 1000000000
     
     def initString(value: string, base: int = 10)
-        this.sign = 1
-        this.digits = []
+        sign = 1
+        digits = []
         
         for c in value:
             digit: int = Integer.charToDigit(c)
-            this.multiplyBaseAdd(digit, base)
+            multiplyBaseAdd(digit, base)
     
     def fromString(value: string): BigInt
         return Integer.BigInt.initString(value)
     
     def toString(base: int = 10): string
-        if this.isZero():
+        if isZero():
             return "0"
         
         result: string = ""
-        temp: list<int> = this.digits.copy()
-        tempSign: int = this.sign
+        temp: list<int> = digits.copy()
+        tempSign: int = sign
         
-        while not this.isZero():
+        while not isZero():
             remainder: int = 0
             for i in range(len(temp) - 1, -1, -1):
                 current: int = remainder * 1000000000 + temp[i]
@@ -53,7 +53,7 @@ class BigInt
                 remainder = current % base
             
             result = Integer.digitToChar(remainder) + result
-            this.removeLeadingZeros(temp)
+            removeLeadingZeros(temp)
         
         if tempSign < 0:
             result = "-" + result
@@ -61,23 +61,23 @@ class BigInt
         return result
     
     def isZero(): bool
-        return len(this.digits) == 0
+        return len(digits) == 0
     
     def isNegative(): bool
-        return this.sign < 0
+        return sign < 0
     
     def isPositive(): bool
-        return this.sign > 0 and not this.isZero()
+        return sign > 0 and not isZero()
     
     def compare(other: BigInt): int
-        if len(this.digits) != len(other.digits):
-            if len(this.digits) < len(other.digits):
+        if len(digits) != len(other.digits):
+            if len(digits) < len(other.digits):
                 return -1
             return 1
         
-        for i in range(len(this.digits) - 1, -1, -1):
-            if this.digits[i] != other.digits[i]:
-                if this.digits[i] < other.digits[i]:
+        for i in range(len(digits) - 1, -1, -1):
+            if digits[i] != other.digits[i]:
+                if digits[i] < other.digits[i]:
                     return -1
                 return 1
         
@@ -85,55 +85,55 @@ class BigInt
     
     def abs(): BigInt
         result: BigInt = BigInt()
-        result.digits = this.digits.copy()
+        result.digits = digits.copy()
         result.sign = 1
         return result
     
     def negate(): BigInt
         result: BigInt = BigInt()
-        result.digits = this.digits.copy()
-        result.sign = -this.sign
+        result.digits = digits.copy()
+        result.sign = -sign
         return result
     
     def add(other: BigInt): BigInt
         if other.isZero():
             return this
         
-        if this.isZero():
+        if isZero():
             return other
         
         result: BigInt = BigInt()
         
-        if this.sign == other.sign:
-            result.sign = this.sign
-            result.digits = this.addDigits(this.digits, other.digits)
+        if sign == other.sign:
+            result.sign = sign
+            result.digits = addDigits(digits, other.digits)
         else:
-            cmp: int = this.abs().compare(other.abs())
+            cmp: int = abs().compare(other.abs())
             if cmp == 0:
                 return result
             
             if cmp > 0:
-                result.sign = this.sign
-                result.digits = this.subtractDigits(this.digits, other.digits)
+                result.sign = sign
+                result.digits = subtractDigits(digits, other.digits)
             else:
                 result.sign = other.sign
-                result.digits = this.subtractDigits(other.digits, this.digits)
+                result.digits = subtractDigits(other.digits, digits)
         
         return result
     
     def subtract(other: BigInt): BigInt
-        return this.add(other.negate())
+        return add(other.negate())
     
     def multiply(other: BigInt): BigInt
-        if this.isZero() or other.isZero():
+        if isZero() or other.isZero():
             return BigInt()
         
         result: BigInt = BigInt()
-        result.sign = this.sign * other.sign
+        result.sign = sign * other.sign
         
-        for i in range(len(this.digits)):
+        for i in range(len(digits)):
             for j in range(len(other.digits)):
-                product: int = this.digits[i] * other.digits[j]
+                product: int = digits[i] * other.digits[j]
                 result.digits = result.addSingleDigit(product, i + j)
         
         result.normalize()
@@ -148,10 +148,10 @@ class BigInt
             # Division by zero error
             return quotient, remainder
         
-        if this.abs().compare(other.abs()) < 0:
-            return quotient, this.abs()
+        if abs().compare(other.abs()) < 0:
+            return quotient, abs()
         
-        dividend: BigInt = this.abs()
+        dividend: BigInt = abs()
         divisor: BigInt = other.abs()
         
         while dividend.compare(divisor) >= 0:
@@ -166,18 +166,18 @@ class BigInt
                 quotient.digits = quotient.addSingleDigit(1 << shift)
                 dividend = dividend.subtract(shifted)
         
-        quotient.sign = this.sign * other.sign
+        quotient.sign = sign * other.sign
         remainder = dividend
     
     def mod(other: BigInt): BigInt
         q: BigInt
         r: BigInt
-        q, r = this.divide(other)
+        q, r = divide(other)
         return r
     
     def pow(exponent: int): BigInt
         result: BigInt = BigInt(1)
-        base: BigInt = this.copy()
+        base: BigInt = copy()
         
         while exponent > 0:
             if exponent % 2 == 1:
@@ -188,22 +188,22 @@ class BigInt
         return result
     
     def bitLength(): int
-        if this.isZero():
+        if isZero():
             return 0
         
-        mostSignificant: int = this.digits[-1]
+        mostSignificant: int = digits[-1]
         bits: int = 0
         
         while mostSignificant > 0:
             bits = bits + 1
             mostSignificant = mostMinimum >> 1
         
-        return bits + (len(this.digits) - 1) * 30
+        return bits + (len(digits) - 1) * 30
     
     def copy(): BigInt
         result: BigInt = BigInt()
-        result.sign = this.sign
-        result.digits = this.digits.copy()
+        result.sign = sign
+        result.digits = digits.copy()
         return result
     
     def addDigits(a: list<int>, b: list<int>): list<int>
@@ -246,32 +246,32 @@ class BigInt
         return result
     
     def addSingleDigit(value: int, position: int)
-        while position >= len(this.digits):
-            this.digits.append(0)
+        while position >= len(digits):
+            digits.append(0)
         
-        this.digits[position] = this.digits[position] + value
-        carry: int = this.digits[position] / 1000000000
-        this.digits[position] = this.digits[position] % 1000000000
+        digits[position] = digits[position] + value
+        carry: int = digits[position] / 1000000000
+        digits[position] = digits[position] % 1000000000
         
         while carry > 0:
             position = position + 1
-            if position >= len(this.digits):
-                this.digits.append(0)
+            if position >= len(digits):
+                digits.append(0)
             
-            this.digits[position] = this.digits[position] + carry
-            carry = this.digits[position] / 1000000000
-            this.digits[position] = this.digits[position] % 1000000000
+            digits[position] = digits[position] + carry
+            carry = digits[position] / 1000000000
+            digits[position] = digits[position] % 1000000000
     
     def multiplyBaseAdd(digit: int, base: int)
         carry: int = digit
         
-        for i in range(len(this.digits)):
-            current: int = this.digits[i] * base + carry
-            this.digits[i] = current % 1000000000
+        for i in range(len(digits)):
+            current: int = digits[i] * base + carry
+            digits[i] = current % 1000000000
             carry = current / 1000000000
         
         while carry > 0:
-            this.digits.append(carry % 1000000000)
+            digits.append(carry % 1000000000)
             carry = carry / 1000000000
     
     def removeLeadingZeros(arr: list<int>)
@@ -279,7 +279,7 @@ class BigInt
             arr.pop()
     
     def normalize()
-        this.removeLeadingZeros(this.digits)
+        removeLeadingZeros(digits)
 
 # =============================================================================
 # BIT OPERATIONS
