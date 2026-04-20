@@ -31,6 +31,7 @@ typedef struct {
     char* return_type;
     ASTNode** body;
     size_t body_count;
+    int is_static;
 } FunctionData;
 
 typedef struct {

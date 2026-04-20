@@ -208,11 +208,11 @@ size: int = sizeof(int)  # Size of type
 class Point:
     x: float
     y: float
-    
+
     def init(self, x_val: float, y_val: float):
         self.x = x_val
         self.y = y_val
-    
+
     def distance(self) -> float:
         return (self.x * self.x + self.y * self.y) ** 0.5
 
@@ -220,6 +220,33 @@ def main():
     p = Point()
     p.init(3.0, 4.0)
     print(p.distance())  # Outputs: 5.0
+```
+
+**`self` and `this`**: Both keywords refer to the current instance. Use as a variable to access attributes or call methods on the current object. Available in class methods only:
+
+```addx
+class Counter:
+    count: int
+
+    def reset(self):
+        self.count = 0
+
+    def increment(self):
+        this.count = this.count + 1
+```
+
+### Do Loop
+
+The `do` keyword is an alias for `for`. It iterates over a range:
+
+```addx
+# Equivalent to: for i in range(10):
+do i in range(10):
+    print(i)
+
+# With explicit start/end/step
+do i in range(0, 20, 2):
+    print(i)  # 0, 2, 4, ..., 18
 ```
 
 ### Memory Management

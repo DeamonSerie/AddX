@@ -197,6 +197,10 @@ void run_vm(VM* vm, Function* func) {
                 
                 for (size_t f = 0; f < vm->function_count; f++) {
                     if (strcmp(vm->functions[f].name, inst->str_arg) == 0) {
+                        if (vm->functions[f].is_static) {
+                            fprintf(stderr, "Error: Cannot call private method '%s'\n", inst->str_arg);
+                            return;
+                        }
                         run_vm(vm, &vm->functions[f]);
                         break;
                     }

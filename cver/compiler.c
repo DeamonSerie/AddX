@@ -441,6 +441,7 @@ CompiledProgram* compile(ASTNode* ast) {
             func->return_type = fd->return_type;
             func->instructions = func_comp.instructions;
             func->instruction_count = func_comp.count;
+            func->is_static = fd->is_static;
         } else {
             compile_node(&global_comp, data->statements[i]);
         }

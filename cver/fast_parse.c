@@ -166,6 +166,13 @@ static ASTNode* parse_exp();
 static ASTNode** parse_block(size_t* out_count, int brace);
 
 static ASTNode* parse_function() {
+    int is_static = 0;
+    
+    if (match("@local")) {
+        is_static = 1;
+        while (pos < src_len && (src[pos] == ' ' || src[pos] == '\t')) pos++;
+    }
+    
     pos += 3;
     const char* name = read_ident();
     
@@ -218,6 +225,7 @@ static ASTNode* parse_function() {
     d->return_type = (char*)return_type;
     d->body = body;
     d->body_count = body_count;
+    d->is_static = is_static;
     return alloc_node(AST_FUNCTION, d);
 }
 

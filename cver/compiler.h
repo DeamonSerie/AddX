@@ -59,6 +59,7 @@ typedef struct {
     char* return_type;
     Instruction* instructions;
     size_t instruction_count;
+    int is_static;
 } Function;
 
 typedef struct {
