@@ -247,7 +247,7 @@ class Loss
         return sum_
     
     def binaryCrossEntropy(prediction: float, target: float) -> float
-        eps = 1e-15
+        eps = 0.000000000000001
         p = Math.max(eps, Math.min(1 - eps, prediction))
         return -target * Math.log(p) - (1 - target) * Math.log(1 - p)
 

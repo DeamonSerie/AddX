@@ -1,0 +1,764 @@
+# Matrix Namespace for AddX
+# Provides 2D, 3D, and 4D matrix operations, complex matrix arithmetic
+#
+# USAGE:
+# ------
+# import Matrix
+#
+# CLASSES:
+#   - Matrix2    : 2x2 matrices for 2D transformations
+#   - Matrix3    : 3x3 matrices for 3D transformations
+#   - Matrix4    : 4x4 matrices for 3D graphics (OpenGL-style column-major)
+#   - Complex    : Complex numbers with arithmetic operations
+#
+# MATRIX2 (2x2) - 2D transformations:
+#   m = Matrix2.identity()       # [[1,0],[0,1]]
+#   m = Matrix2.zeros()           # [[0,0],[0,0]]
+#   m = Matrix2.ones()            # [[1,1],[1,1]]
+#   m = Matrix2.rotation(angle)   # Rotation matrix
+#   m = Matrix2.scale(sx, sy)     # Scale matrix
+#   m = Matrix2.from_list([1,2,3,4])
+#   list = m.to_list()
+#   det = m.determinant()
+#   inv = m.inverse()
+#   trans = m.transpose()
+#   result = m.add(other)
+#   result = m.sub(other)
+#   result = m.scale(2.0)
+#   result = m.multiply(other)
+#   vec = m.apply_vector([x, y])
+#
+# MATRIX3 (3x3) - 3D transformations:
+#   m = Matrix3.identity()
+#   m = Matrix3.rotation_x(angle)  # Rotate around X axis
+#   m = Matrix3.rotation_y(angle)  # Rotate around Y axis
+#   m = Matrix3.rotation_z(angle) # Rotate around Z axis
+#   m = Matrix3.rotation_axis([ax, ay, az], angle)
+#   m = Matrix3.scale(sx, sy, sz)
+#   m = Matrix3.translation(tx, ty)
+#   det = m.determinant()
+#   trace = m.trace()
+#   row = m.get_row(0)            # Get row 0, 1, or 2
+#   col = m.get_col(0)           # Get col 0, 1, or 2
+#   m.set_row(0, [a, b, c])
+#   m.set_col(0, [a, b, c])
+#
+# MATRIX4 (4x4) - 3D Graphics:
+#   m = Matrix4.identity()
+#   m = Matrix4.translation(x, y, z)
+#   m = Matrix4.scale(x, y, z)
+#   m = Matrix4.rotation_x/y_z(angle)
+#   m = Matrix4.look_at(eye, center, up)
+#   m = Matrix4.perspective(fov, aspect, near, far)
+#   m = Matrix4.ortho(left, right, bottom, top, near, far)
+#   m = Matrix4.from_matrix3(m3) # Convert 3x3 to 4x4
+#   vec = m.apply_vector([x, y, z, w])
+#
+# COMPLEX - Complex Numbers:
+#   c = Complex(re, im)          # c = re + im*i
+#   c = Complex.from_polar(r, theta)
+#   c = Complex.from_real(re)     # Real number as Complex
+#   c = Complex.from_imag(im)     # Pure imaginary
+#   r = c.magnitude()            # |c| = sqrt(re^2 + im^2)
+#   theta = c.argument()        # arg(c) = atan2(im, re)
+#   conj = c.conjugate()         # re - im*i
+#   result = c.add(other)
+#   result = c.sub(other)
+#   result = c.mul(other)        # Multiplication
+#   result = c.div(other)       # Division
+#   result = c.scale(s)        # Scalar multiply
+#   result = c.negate()         # -c
+#   result = c.reciprocal()      # 1/c
+#   result = c.exp()             # e^c
+#   result = c.log()             # ln(c)
+#   result = c.pow(other)       # c^other
+#   result = c.sqrt()           # Square root
+#
+# UTILITY FUNCTIONS:
+#   Matrix.matrix2_determinant(m)
+#   Matrix.matrix3_determinant(m)
+#   Matrix.matrix_trace(m)
+#   Matrix.matrix_transpose_2d/3d(m)
+#   Matrix.matrix_inverse_2d/3d(m)
+#   Matrix.complex_magnitude(c)
+#   Matrix.complex_argument(c)
+#   Matrix.complex_conjugate(c)
+
+import Math
+
+# =============================================================================
+# MATRIX2 CLASS (2x2 Matrix)
+# =============================================================================
+
+class Matrix2:
+    m00: float
+    m01: float
+    m10: float
+    m11: float
+
+    def __init__(m00: float = 0.0, m01: float = 0.0, m10: float = 0.0, m11: float = 0.0):
+        self.m00 = m00
+        self.m01 = m01
+        self.m10 = m10
+        self.m11 = m11
+
+    def identity() -> 'Matrix2':
+        return Matrix2(1.0, 0.0, 0.0, 1.0)
+
+    def zeros() -> 'Matrix2':
+        return Matrix2(0.0, 0.0, 0.0, 0.0)
+
+    def ones() -> 'Matrix2':
+        return Matrix2(1.0, 1.0, 1.0, 1.0)
+
+    def rotation(angle: float) -> 'Matrix2':
+        cos_a = Math.cos(angle)
+        sin_a = Math.sin(angle)
+        return Matrix2(cos_a, -sin_a, sin_a, cos_a)
+
+    def scale(sx: float, sy: float) -> 'Matrix2':
+        return Matrix2(sx, 0.0, 0.0, sy)
+
+    def from_list(data: list<float>) -> 'Matrix2':
+        if len(data) < 4:
+            return Matrix2.zeros()
+        return Matrix2(data[0], data[1], data[2], data[3])
+
+    def to_list() -> list<float>:
+        return [self.m00, self.m01, self.m10, self.m11]
+
+    def to_string() -> string:
+        return "Matrix2([[" + self.m00 + ", " + self.m01 + "], [" + self.m10 + ", " + self.m11 + "]])"
+
+    def add(other: 'Matrix2') -> 'Matrix2':
+        return Matrix2(
+            self.m00 + other.m00,
+            self.m01 + other.m01,
+            self.m10 + other.m10,
+            self.m11 + other.m11
+        )
+
+    def sub(other: 'Matrix2') -> 'Matrix2':
+        return Matrix2(
+            self.m00 - other.m00,
+            self.m01 - other.m01,
+            self.m10 - other.m10,
+            self.m11 - other.m11
+        )
+
+    def scale(scalar: float) -> 'Matrix2':
+        return Matrix2(
+            self.m00 * scalar,
+            self.m01 * scalar,
+            self.m10 * scalar,
+            self.m11 * scalar
+        )
+
+    def multiply(other: 'Matrix2') -> 'Matrix2':
+        return Matrix2(
+            self.m00 * other.m00 + self.m01 * other.m10,
+            self.m00 * other.m01 + self.m01 * other.m11,
+            self.m10 * other.m00 + self.m11 * other.m10,
+            self.m10 * other.m01 + self.m11 * other.m11
+        )
+
+    def determinant() -> float:
+        return self.m00 * self.m11 - self.m01 * self.m10
+
+    def transpose() -> 'Matrix2':
+        return Matrix2(self.m00, self.m10, self.m01, self.m11)
+
+    def inverse() -> 'Matrix2':
+        det = self.determinant()
+        if Math.abs(det) < Math.EPSILON:
+            return Matrix2.zeros()
+        inv_det = 1.0 / det
+        return Matrix2(
+            self.m11 * inv_det,
+            -self.m01 * inv_det,
+            -self.m10 * inv_det,
+            self.m00 * inv_det
+        )
+
+    def trace() -> float:
+        return self.m00 + self.m11
+
+    def apply_vector(vec: list<float>) -> list<float>:
+        if len(vec) < 2:
+            return [0.0, 0.0]
+        return [
+            self.m00 * vec[0] + self.m01 * vec[1],
+            self.m10 * vec[0] + self.m11 * vec[1]
+        ]
+
+# =============================================================================
+# MATRIX3 CLASS (3x3 Matrix)
+# =============================================================================
+
+class Matrix3:
+    m00: float
+    m01: float
+    m02: float
+    m10: float
+    m11: float
+    m12: float
+    m20: float
+    m21: float
+    m22: float
+
+    def __init__(
+        m00: float = 0.0, m01: float = 0.0, m02: float = 0.0,
+        m10: float = 0.0, m11: float = 0.0, m12: float = 0.0,
+        m20: float = 0.0, m21: float = 0.0, m22: float = 0.0
+    ):
+        self.m00 = m00
+        self.m01 = m01
+        self.m02 = m02
+        self.m10 = m10
+        self.m11 = m11
+        self.m12 = m12
+        self.m20 = m20
+        self.m21 = m21
+        self.m22 = m22
+
+    def identity() -> 'Matrix3':
+        return Matrix3(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0)
+
+    def zeros() -> 'Matrix3':
+        return Matrix3(0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0)
+
+    def ones() -> 'Matrix3':
+        return Matrix3(1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0)
+
+    def rotation_x(angle: float) -> 'Matrix3':
+        cos_a = Math.cos(angle)
+        sin_a = Math.sin(angle)
+        return Matrix3(1.0, 0.0, 0.0, 0.0, cos_a, -sin_a, 0.0, sin_a, cos_a)
+
+    def rotation_y(angle: float) -> 'Matrix3':
+        cos_a = Math.cos(angle)
+        sin_a = Math.sin(angle)
+        return Matrix3(cos_a, 0.0, sin_a, 0.0, 1.0, 0.0, -sin_a, 0.0, cos_a)
+
+    def rotation_z(angle: float) -> 'Matrix3':
+        cos_a = Math.cos(angle)
+        sin_a = Math.sin(angle)
+        return Matrix3(cos_a, -sin_a, 0.0, sin_a, cos_a, 0.0, 0.0, 0.0, 1.0)
+
+    def rotation_axis(axis: list<float>, angle: float) -> 'Matrix3':
+        ax = axis[0]
+        ay = axis[1]
+        az = axis[2]
+        length = Math.sqrt(ax * ax + ay * ay + az * az)
+        if length < Math.EPSILON:
+            return Matrix3.identity()
+        ax = ax / length
+        ay = ay / length
+        az = az / length
+        cos_a = Math.cos(angle)
+        sin_a = Math.sin(angle)
+        t = 1.0 - cos_a
+        return Matrix3(
+            t * ax * ax + cos_a, t * ax * ay - sin_a * az, t * ax * az + sin_a * ay,
+            t * ax * ay + sin_a * az, t * ay * ay + cos_a, t * ay * az - sin_a * ax,
+            t * ax * az - sin_a * ay, t * ay * az + sin_a * ax, t * az * az + cos_a
+        )
+
+    def scale(sx: float, sy: float, sz: float) -> 'Matrix3':
+        return Matrix3(sx, 0.0, 0.0, 0.0, sy, 0.0, 0.0, 0.0, sz)
+
+    def translation(tx: float, ty: float) -> 'Matrix3':
+        return Matrix3(1.0, 0.0, tx, 0.0, 1.0, ty, 0.0, 0.0, 1.0)
+
+    def from_list(data: list<float>) -> 'Matrix3':
+        if len(data) < 9:
+            return Matrix3.zeros()
+        return Matrix3(
+            data[0], data[1], data[2],
+            data[3], data[4], data[5],
+            data[6], data[7], data[8]
+        )
+
+    def to_list() -> list<float>:
+        return [
+            self.m00, self.m01, self.m02,
+            self.m10, self.m11, self.m12,
+            self.m20, self.m21, self.m22
+        ]
+
+    def to_string() -> string:
+        return "Matrix3([[" + self.m00 + ", " + self.m01 + ", " + self.m02 + "], ...])"
+
+    def add(other: 'Matrix3') -> 'Matrix3':
+        return Matrix3(
+            self.m00 + other.m00, self.m01 + other.m01, self.m02 + other.m02,
+            self.m10 + other.m10, self.m11 + other.m11, self.m12 + other.m12,
+            self.m20 + other.m20, self.m21 + other.m21, self.m22 + other.m22
+        )
+
+    def sub(other: 'Matrix3') -> 'Matrix3':
+        return Matrix3(
+            self.m00 - other.m00, self.m01 - other.m01, self.m02 - other.m02,
+            self.m10 - other.m10, self.m11 - other.m11, self.m12 - other.m12,
+            self.m20 - other.m20, self.m21 - other.m21, self.m22 - other.m22
+        )
+
+    def scale(scalar: float) -> 'Matrix3':
+        return Matrix3(
+            self.m00 * scalar, self.m01 * scalar, self.m02 * scalar,
+            self.m10 * scalar, self.m11 * scalar, self.m12 * scalar,
+            self.m20 * scalar, self.m21 * scalar, self.m22 * scalar
+        )
+
+    def multiply(other: 'Matrix3') -> 'Matrix3':
+        return Matrix3(
+            self.m00 * other.m00 + self.m01 * other.m10 + self.m02 * other.m20,
+            self.m00 * other.m01 + self.m01 * other.m11 + self.m02 * other.m21,
+            self.m00 * other.m02 + self.m01 * other.m12 + self.m02 * other.m22,
+            self.m10 * other.m00 + self.m11 * other.m10 + self.m12 * other.m20,
+            self.m10 * other.m01 + self.m11 * other.m11 + self.m12 * other.m21,
+            self.m10 * other.m02 + self.m11 * other.m12 + self.m12 * other.m22,
+            self.m20 * other.m00 + self.m21 * other.m10 + self.m22 * other.m20,
+            self.m20 * other.m01 + self.m21 * other.m11 + self.m22 * other.m21,
+            self.m20 * other.m02 + self.m21 * other.m12 + self.m22 * other.m22
+        )
+
+    def determinant() -> float:
+        return (
+            self.m00 * (self.m11 * self.m22 - self.m12 * self.m21) -
+            self.m01 * (self.m10 * self.m22 - self.m12 * self.m20) +
+            self.m02 * (self.m10 * self.m21 - self.m11 * self.m20)
+        )
+
+    def transpose() -> 'Matrix3':
+        return Matrix3(
+            self.m00, self.m10, self.m20,
+            self.m01, self.m11, self.m21,
+            self.m02, self.m12, self.m22
+        )
+
+    def inverse() -> 'Matrix3':
+        det = self.determinant()
+        if Math.abs(det) < Math.EPSILON:
+            return Matrix3.zeros()
+        inv_det = 1.0 / det
+        return Matrix3(
+            (self.m11 * self.m22 - self.m12 * self.m21) * inv_det,
+            (self.m02 * self.m21 - self.m01 * self.m22) * inv_det,
+            (self.m01 * self.m12 - self.m02 * self.m11) * inv_det,
+            (self.m12 * self.m20 - self.m10 * self.m22) * inv_det,
+            (self.m00 * self.m22 - self.m02 * self.m20) * inv_det,
+            (self.m02 * self.m10 - self.m00 * self.m12) * inv_det,
+            (self.m10 * self.m21 - self.m11 * self.m20) * inv_det,
+            (self.m01 * self.m20 - self.m00 * self.m21) * inv_det,
+            (self.m00 * self.m11 - self.m01 * self.m10) * inv_det
+        )
+
+    def trace() -> float:
+        return self.m00 + self.m11 + self.m22
+
+    def apply_vector(vec: list<float>) -> list<float>:
+        if len(vec) < 3:
+            return [0.0, 0.0, 0.0]
+        return [
+            self.m00 * vec[0] + self.m01 * vec[1] + self.m02 * vec[2],
+            self.m10 * vec[0] + self.m11 * vec[1] + self.m12 * vec[2],
+            self.m20 * vec[0] + self.m21 * vec[1] + self.m22 * vec[2]
+        ]
+
+    def get_row(row: int) -> list<float>:
+        if row == 0:
+            return [self.m00, self.m01, self.m02]
+        elif row == 1:
+            return [self.m10, self.m11, self.m12]
+        elif row == 2:
+            return [self.m20, self.m21, self.m22]
+        return [0.0, 0.0, 0.0]
+
+    def get_col(col: int) -> list<float>:
+        if col == 0:
+            return [self.m00, self.m10, self.m20]
+        elif col == 1:
+            return [self.m01, self.m11, self.m21]
+        elif col == 2:
+            return [self.m02, self.m12, self.m22]
+        return [0.0, 0.0, 0.0]
+
+    def set_row(row: int, values: list<float>):
+        if row == 0:
+            self.m00 = values[0]
+            self.m01 = values[1]
+            self.m02 = values[2]
+        elif row == 1:
+            self.m10 = values[0]
+            self.m11 = values[1]
+            self.m12 = values[2]
+        elif row == 2:
+            self.m20 = values[0]
+            self.m21 = values[1]
+            self.m22 = values[2]
+
+    def set_col(col: int, values: list<float>):
+        if col == 0:
+            self.m00 = values[0]
+            self.m10 = values[1]
+            self.m20 = values[2]
+        elif col == 1:
+            self.m01 = values[0]
+            self.m11 = values[1]
+            self.m21 = values[2]
+        elif col == 2:
+            self.m02 = values[0]
+            self.m12 = values[1]
+            self.m22 = values[2]
+
+# =============================================================================
+# MATRIX4 CLASS (4x4 Matrix for 3D graphics)
+# =============================================================================
+
+class Matrix4:
+    m: list<float>  # Stored as 16-element array (column-major for OpenGL)
+
+    def __init__(data: list<float> = None):
+        if data is None:
+            self.m = [0.0] * 16
+        else:
+            self.m = data
+
+    def identity() -> 'Matrix4':
+        return Matrix4([1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0])
+
+    def zeros() -> 'Matrix4':
+        return Matrix4([0.0] * 16)
+
+    def ones() -> 'Matrix4':
+        return Matrix4([1.0] * 16)
+
+    def translation(x: float, y: float, z: float) -> 'Matrix4':
+        return Matrix4([
+            1.0, 0.0, 0.0, 0.0,
+            0.0, 1.0, 0.0, 0.0,
+            0.0, 0.0, 1.0, 0.0,
+            x, y, z, 1.0
+        ])
+
+    def scale(x: float, y: float, z: float) -> 'Matrix4':
+        return Matrix4([
+            x, 0.0, 0.0, 0.0,
+            0.0, y, 0.0, 0.0,
+            0.0, 0.0, z, 0.0,
+            0.0, 0.0, 0.0, 1.0
+        ])
+
+    def rotation_x(angle: float) -> 'Matrix4':
+        cos_a = Math.cos(angle)
+        sin_a = Math.sin(angle)
+        return Matrix4([
+            1.0, 0.0, 0.0, 0.0,
+            0.0, cos_a, -sin_a, 0.0,
+            0.0, sin_a, cos_a, 0.0,
+            0.0, 0.0, 0.0, 1.0
+        ])
+
+    def rotation_y(angle: float) -> 'Matrix4':
+        cos_a = Math.cos(angle)
+        sin_a = Math.sin(angle)
+        return Matrix4([
+            cos_a, 0.0, sin_a, 0.0,
+            0.0, 1.0, 0.0, 0.0,
+            -sin_a, 0.0, cos_a, 0.0,
+            0.0, 0.0, 0.0, 1.0
+        ])
+
+    def rotation_z(angle: float) -> 'Matrix4':
+        cos_a = Math.cos(angle)
+        sin_a = Math.sin(angle)
+        return Matrix4([
+            cos_a, -sin_a, 0.0, 0.0,
+            sin_a, cos_a, 0.0, 0.0,
+            0.0, 0.0, 1.0, 0.0,
+            0.0, 0.0, 0.0, 1.0
+        ])
+
+    def look_at(eye: list<float>, center: list<float>, up: list<float>) -> 'Matrix4':
+        f = [center[0] - eye[0], center[1] - eye[1], center[2] - eye[2]]
+        f_len = Math.sqrt(f[0] * f[0] + f[1] * f[1] + f[2] * f[2])
+        f = [f[0] / f_len, f[1] / f_len, f[2] / f_len]
+        
+        s = [
+            f[1] * up[2] - f[2] * up[1],
+            f[2] * up[0] - f[0] * up[2],
+            f[0] * up[1] - f[1] * up[0]
+        ]
+        s_len = Math.sqrt(s[0] * s[0] + s[1] * s[1] + s[2] * s[2])
+        s = [s[0] / s_len, s[1] / s_len, s[2] / s_len]
+        
+        u = [
+            s[1] * f[2] - s[2] * f[1],
+            s[2] * f[0] - s[0] * f[2],
+            s[0] * f[1] - s[1] * f[0]
+        ]
+        
+        return Matrix4([
+            s[0], u[0], -f[0], 0.0,
+            s[1], u[1], -f[1], 0.0,
+            s[2], u[2], -f[2], 0.0,
+            -(s[0] * eye[0] + s[1] * eye[1] + s[2] * eye[2]),
+            -(u[0] * eye[0] + u[1] * eye[1] + u[2] * eye[2]),
+            (f[0] * eye[0] + f[1] * eye[1] + f[2] * eye[2]),
+            1.0
+        ])
+
+    def perspective(fov: float, aspect: float, near: float, far: float) -> 'Matrix4':
+        f = 1.0 / Math.tan(fov / 2.0)
+        range_inv = 1.0 / (near - far)
+        return Matrix4([
+            f / aspect, 0.0, 0.0, 0.0,
+            0.0, f, 0.0, 0.0,
+            0.0, 0.0, (near + far) * range_inv, -1.0,
+            0.0, 0.0, near * far * range_inv * 2.0, 0.0
+        ])
+
+    def ortho(left: float, right: float, bottom: float, top: float, near: float, far: float) -> 'Matrix4':
+        return Matrix4([
+            2.0 / (right - left), 0.0, 0.0, 0.0,
+            0.0, 2.0 / (top - bottom), 0.0, 0.0,
+            0.0, 0.0, -2.0 / (far - near), 0.0,
+            -(right + left) / (right - left), -(top + bottom) / (top - bottom), -(far + near) / (far - near), 1.0
+        ])
+
+    def from_matrix3(m3: Matrix3) -> 'Matrix4':
+        data = m3.to_list()
+        return Matrix4([
+            data[0], data[1], data[2], 0.0,
+            data[3], data[4], data[5], 0.0,
+            data[6], data[7], data[8], 0.0,
+            0.0, 0.0, 0.0, 1.0
+        ])
+
+    def to_list() -> list<float>:
+        return self.m
+
+    def to_string() -> string:
+        return "Matrix4(...)"
+
+    def get_element(row: int, col: int) -> float:
+        return self.m[col * 4 + row]
+
+    def set_element(row: int, col: int, value: float):
+        self.m[col * 4 + row] = value
+
+    def add(other: 'Matrix4') -> 'Matrix4':
+        result = []
+        for i in range(16):
+            result.append(self.m[i] + other.m[i])
+        return Matrix4(result)
+
+    def sub(other: 'Matrix4') -> 'Matrix4':
+        result = []
+        for i in range(16):
+            result.append(self.m[i] - other.m[i])
+        return Matrix4(result)
+
+    def scale(scalar: float) -> 'Matrix4':
+        result = []
+        for i in range(16):
+            result.append(self.m[i] * scalar)
+        return Matrix4(result)
+
+    def multiply(other: 'Matrix4') -> 'Matrix4':
+        result = [0.0] * 16
+        for col in range(4):
+            for row in range(4):
+                sum_val = 0.0
+                for k in range(4):
+                    sum_val = sum_val + self.m[k * 4 + row] * other.m[col * 4 + k]
+                result[col * 4 + row] = sum_val
+        return Matrix4(result)
+
+    def transpose() -> 'Matrix4':
+        return Matrix4([
+            self.m[0], self.m[4], self.m[8], self.m[12],
+            self.m[1], self.m[5], self.m[9], self.m[13],
+            self.m[2], self.m[6], self.m[10], self.m[14],
+            self.m[3], self.m[7], self.m[11], self.m[15]
+        ])
+
+    def apply_vector(vec: list<float>) -> list<float>:
+        if len(vec) < 4:
+            return [0.0, 0.0, 0.0, 0.0]
+        return [
+            self.m[0] * vec[0] + self.m[4] * vec[1] + self.m[8] * vec[2] + self.m[12] * vec[3],
+            self.m[1] * vec[0] + self.m[5] * vec[1] + self.m[9] * vec[2] + self.m[13] * vec[3],
+            self.m[2] * vec[0] + self.m[6] * vec[1] + self.m[10] * vec[2] + self.m[14] * vec[3],
+            self.m[3] * vec[0] + self.m[7] * vec[1] + self.m[11] * vec[2] + self.m[15] * vec[3]
+        ]
+
+# =============================================================================
+# COMPLEX NUMBER CLASS
+# =============================================================================
+
+class Complex:
+    re: float
+    im: float
+
+    def __init__(re: float = 0.0, im: float = 0.0):
+        self.re = re
+        self.im = im
+
+    def from_polar(r: float, theta: float) -> 'Complex':
+        return Complex(r * Math.cos(theta), r * Math.sin(theta))
+
+    def from_real(re: float) -> 'Complex':
+        return Complex(re, 0.0)
+
+    def from_imag(im: float) -> 'Complex':
+        return Complex(0.0, im)
+
+    def to_string() -> string:
+        sign = "+" if self.im >= 0 else "-"
+        return "" + self.re + sign + Math.abs(self.im) + "i"
+
+    def magnitude() -> float:
+        return Math.sqrt(self.re * self.re + self.im * self.im)
+
+    def argument() -> float:
+        return Math.atan2(self.im, self.re)
+
+    def conjugate() -> 'Complex':
+        return Complex(self.re, -self.im)
+
+    def add(other: 'Complex') -> 'Complex':
+        return Complex(self.re + other.re, self.im + other.im)
+
+    def sub(other: 'Complex') -> 'Complex':
+        return Complex(self.re - other.re, self.im - other.im)
+
+    def mul(other: 'Complex') -> 'Complex':
+        return Complex(
+            self.re * other.re - self.im * other.im,
+            self.re * other.im + self.im * other.re
+        )
+
+    def div(other: 'Complex') -> 'Complex':
+        denom = other.re * other.re + other.im * other.im
+        if denom == 0.0:
+            return Complex(0.0, 0.0)
+        return Complex(
+            (self.re * other.re + self.im * other.im) / denom,
+            (self.im * other.re - self.re * other.im) / denom
+        )
+
+    def scale(scalar: float) -> 'Complex':
+        return Complex(self.re * scalar, self.im * scalar)
+
+    def negate() -> 'Complex':
+        return Complex(-self.re, -self.im)
+
+    def reciprocal() -> 'Complex':
+        denom = self.re * self.re + self.im * self.im
+        if denom == 0.0:
+            return Complex(0.0, 0.0)
+        return Complex(self.re / denom, -self.im / denom)
+
+    def exp() -> 'Complex':
+        exp_re = Math.exp(self.re)
+        return Complex(exp_re * Math.cos(self.im), exp_re * Math.sin(self.im))
+
+    def log() -> 'Complex':
+        return Complex(Math.log(self.magnitude()), self.argument())
+
+    def pow(other: 'Complex') -> 'Complex':
+        if other.re == 0.0 and other.im == 0.0:
+            return Complex(1.0, 0.0)
+        return other.mul(self.log()).exp()
+
+    def sqrt() -> 'Complex':
+        r = self.magnitude() ** 0.5
+        theta = self.argument() / 2.0
+        return Complex(r * Math.cos(theta), r * Math.sin(theta))
+
+# =============================================================================
+# UTILITY FUNCTIONS
+# =============================================================================
+
+def matrix2_determinant(m: Matrix2) -> float:
+    return m.determinant()
+
+def matrix3_determinant(m: Matrix3) -> float:
+    return m.determinant()
+
+def matrix_trace(m: Matrix3) -> float:
+    return m.trace()
+
+def matrix_transpose_2d(m: Matrix2) -> Matrix2:
+    return m.transpose()
+
+def matrix_transpose_3d(m: Matrix3) -> Matrix3:
+    return m.transpose()
+
+def matrix_inverse_2d(m: Matrix2) -> Matrix2:
+    return m.inverse()
+
+def matrix_inverse_3d(m: Matrix3) -> Matrix3:
+    return m.inverse()
+
+def complex_magnitude(c: Complex) -> float:
+    return c.magnitude()
+
+def complex_argument(c: Complex) -> float:
+    return c.argument()
+
+def complex_conjugate(c: Complex) -> Complex:
+    return c.conjugate()
+
+# =============================================================================
+# EXAMPLE USAGE
+# =============================================================================
+
+def main():
+    print("=== Matrix Namespace Demo ===")
+    print()
+
+    print("Matrix2 Demo:")
+    m2_a = Matrix2.identity()
+    m2_b = Matrix2.rotation(Math.PI / 4)
+    print("Identity:", m2_a.to_string())
+    print("Rotation 45deg:", m2_b.to_string())
+    m2_c = m2_a.multiply(m2_b)
+    print("Determinant:", m2_c.determinant())
+    print()
+
+    print("Matrix3 Demo:")
+    m3_a = Matrix3.identity()
+    m3_b = Matrix3.rotation_z(Math.PI / 2)
+    print("Identity:", m3_a.to_string())
+    print("Rotation Z 90deg:", m3_b.to_string())
+    m3_c = m3_a.multiply(m3_b)
+    print("Trace:", m3_c.trace())
+    print("Determinant:", m3_c.determinant())
+    print()
+
+    print("Matrix4 Demo:")
+    m4 = Matrix4.translation(1.0, 2.0, 3.0)
+    print("Translation:", m4.to_string())
+    vec = [1.0, 0.0, 0.0, 1.0]
+    result = m4.apply_vector(vec)
+    print("Apply to vec", vec, ":", result)
+    print()
+
+    print("Complex Demo:")
+    c1 = Complex.from_polar(1.0, Math.PI / 3)
+    c2 = Complex(2.0, 1.0)
+    print("c1 (polar):", c1.to_string())
+    print("c2:", c2.to_string())
+    print("c1 * c2:", c1.mul(c2).to_string())
+    print("|c2|:", c2.magnitude())
+    print("arg(c2):", c2.argument())
+    print("sqrt(-1):", Complex(-1.0, 0.0).sqrt().to_string())
+    print()
+
+    print("=== End Demo ===")
+
+if __name__ == "__main__":
+    main()
