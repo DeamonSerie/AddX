@@ -45,6 +45,7 @@ class AddXParser:
             if v == 'static': return self.parse_static()
             if v == 'const': return self.parse_const()
             if v == 'class': return self.class_()
+            if v == 'inherit': return self.inherit_stmt()
             if v == 'new': return self.parse_new()
             if v == 'delete': return self.parse_delete()
         return self.expr_stmt()
@@ -64,7 +65,13 @@ class AddXParser:
         rt = 'void'
         if self.check(TokenType.ARROW):
             self.consume()
-            rt = self.expect(TokenType.KEYWORD).value
+            if self.check(TokenType.LBRACE):
+                self.consume()  # consume {
+                inherit_type = self.expect(TokenType.IDENTIFIER).value
+                self.expect(TokenType.RBRACE)  # consume }
+                rt = f'inherit:{inherit_type}'
+            else:
+                rt = self.expect(TokenType.KEYWORD).value
         
         self.expect(TokenType.LBRACE)
         bd = self.block()
@@ -138,6 +145,12 @@ class AddXParser:
         self.consume()
         name = self.expect(TokenType.IDENTIFIER).value
         
+        # Check for inheritance
+        base_class = None
+        if self.check(TokenType.KEYWORD) and self.peek().value == 'inherit':
+            self.consume()  # consume 'inherit'
+            base_class = self.expect(TokenType.IDENTIFIER).value
+        
         # Skip to first non-newline token, check for LBRACE
         while self.check(TokenType.NEWLINE):
             self.consume()
@@ -202,7 +215,16 @@ class AddXParser:
         if self.check(TokenType.RBRACE):
             self.consume()
         
-        return ClassDefNode(name, None, members)
+        return ClassDefNode(name, base_class, members)
+
+    def inherit_stmt(self):
+        # Handle inherit statement: inherit <type>
+        self.consume()  # consume 'inherit'
+        inherited_type = self.expect(TokenType.IDENTIFIER).value
+        # For now, we'll treat this as a standalone statement that could be used in classes
+        # In a more complete implementation, this would modify the current class being defined
+        # For simplicity, we'll create a placeholder node
+        return InheritNode("__current_class__", inherited_type)
     
     def if_(self):
         self.consume()

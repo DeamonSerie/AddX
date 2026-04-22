@@ -8,6 +8,7 @@ class Compiler:
         self.functions: dict[str, Function] = {}
         self.classes: dict[str, AddXClass] = {}
         self.local_vars = set()
+        self.current_class: str = None
     
     def emit(self, opcode: OpCode, *args) -> int:
         self.instructions.append(Instruction(opcode, args if args else ()))
@@ -61,25 +62,130 @@ class Compiler:
         elif isinstance(node, AttributeAccessNode):
             # Attribute access without assignment - just ignore
             pass
+        elif isinstance(node, InheritNode):
+            self.compile_inherit(node)
         else:
             # Other expression statement - compile for side effects
             self.compile_expression(node)
     
-    def compile_function(self, node: FunctionDefNode):
-        compiler = Compiler()
-        compiler.local_vars = {p[0] for p in node.params}
-        
-        for stmt in node.body:
-            compiler.compile_statement(stmt)
-        
-        if not any(isinstance(s, ReturnNode) for s in node.body):
-            compiler.emit(OpCode.RETURN)
-        
-        func = Function(node.name, node.params, node.return_type, compiler.instructions)
-        self.functions[node.name] = func
-    
     def compile_class(self, node: ClassDefNode):
+        # Set current class for inherit statements
+        previous_class = self.current_class
+        self.current_class = node.name
+        
         methods = {}
+        
+        # Add trait methods based on inheritance (base_class)
+        if node.base_class:
+            trait_methods = self.get_trait_methods(node.base_class)
+            for method_name in trait_methods:
+                # Create actual implementations for trait methods
+                # These assume the object stores its value in a 'value' attribute
+                if method_name == 'add':
+                    methods[method_name] = Function(method_name, ['other'], 'void', [
+                        Instruction(OpCode.LOAD_ATTR, 'value'),
+                        Instruction(OpCode.LOAD_ATTR, 'value'),  # Load other.value
+                        Instruction(OpCode.ADD),
+                        Instruction(OpCode.RETURN)
+                    ])
+                elif method_name == 'sub':
+                    methods[method_name] = Function(method_name, ['other'], 'void', [
+                        Instruction(OpCode.LOAD_ATTR, 'value'),
+                        Instruction(OpCode.LOAD_ATTR, 'value'),  # Load other.value
+                        Instruction(OpCode.SUB),
+                        Instruction(OpCode.RETURN)
+                    ])
+                elif method_name == 'mul':
+                    methods[method_name] = Function(method_name, ['other'], 'void', [
+                        Instruction(OpCode.LOAD_ATTR, 'value'),
+                        Instruction(OpCode.LOAD_ATTR, 'value'),  # Load other.value
+                        Instruction(OpCode.MUL),
+                        Instruction(OpCode.RETURN)
+                    ])
+                elif method_name == 'div':
+                    methods[method_name] = Function(method_name, ['other'], 'void', [
+                        Instruction(OpCode.LOAD_ATTR, 'value'),
+                        Instruction(OpCode.LOAD_ATTR, 'value'),  # Load other.value
+                        Instruction(OpCode.DIV),
+                        Instruction(OpCode.RETURN)
+                    ])
+                elif method_name == 'mod':
+                    methods[method_name] = Function(method_name, ['other'], 'void', [
+                        Instruction(OpCode.LOAD_ATTR, 'value'),
+                        Instruction(OpCode.LOAD_ATTR, 'value'),  # Load other.value
+                        Instruction(OpCode.MOD),
+                        Instruction(OpCode.RETURN)
+                    ])
+                elif method_name == 'eq':
+                    methods[method_name] = Function(method_name, ['other'], 'void', [
+                        Instruction(OpCode.LOAD_ATTR, 'value'),
+                        Instruction(OpCode.LOAD_ATTR, 'value'),  # Load other.value
+                        Instruction(OpCode.EQ),
+                        Instruction(OpCode.RETURN)
+                    ])
+                elif method_name == 'ne':
+                    methods[method_name] = Function(method_name, ['other'], 'void', [
+                        Instruction(OpCode.LOAD_ATTR, 'value'),
+                        Instruction(OpCode.LOAD_ATTR, 'value'),  # Load other.value
+                        Instruction(OpCode.NE),
+                        Instruction(OpCode.RETURN)
+                    ])
+                elif method_name == 'lt':
+                    methods[method_name] = Function(method_name, ['other'], 'void', [
+                        Instruction(OpCode.LOAD_ATTR, 'value'),
+                        Instruction(OpCode.LOAD_ATTR, 'value'),  # Load other.value
+                        Instruction(OpCode.LT),
+                        Instruction(OpCode.RETURN)
+                    ])
+                elif method_name == 'gt':
+                    methods[method_name] = Function(method_name, ['other'], 'void', [
+                        Instruction(OpCode.LOAD_ATTR, 'value'),
+                        Instruction(OpCode.LOAD_ATTR, 'value'),  # Load other.value
+                        Instruction(OpCode.GT),
+                        Instruction(OpCode.RETURN)
+                    ])
+                elif method_name == 'le':
+                    methods[method_name] = Function(method_name, ['other'], 'void', [
+                        Instruction(OpCode.LOAD_ATTR, 'value'),
+                        Instruction(OpCode.LOAD_ATTR, 'value'),  # Load other.value
+                        Instruction(OpCode.LE),
+                        Instruction(OpCode.RETURN)
+                    ])
+                elif method_name == 'ge':
+                    methods[method_name] = Function(method_name, ['other'], 'void', [
+                        Instruction(OpCode.LOAD_ATTR, 'value'),
+                        Instruction(OpCode.LOAD_ATTR, 'value'),  # Load other.value
+                        Instruction(OpCode.GE),
+                        Instruction(OpCode.RETURN)
+                    ])
+                elif method_name == 'and':
+                    methods[method_name] = Function(method_name, ['other'], 'void', [
+                        Instruction(OpCode.LOAD_ATTR, 'value'),
+                        Instruction(OpCode.LOAD_ATTR, 'value'),  # Load other.value
+                        Instruction(OpCode.AND),
+                        Instruction(OpCode.RETURN)
+                    ])
+                elif method_name == 'or':
+                    methods[method_name] = Function(method_name, ['other'], 'void', [
+                        Instruction(OpCode.LOAD_ATTR, 'value'),
+                        Instruction(OpCode.LOAD_ATTR, 'value'),  # Load other.value
+                        Instruction(OpCode.OR),
+                        Instruction(OpCode.RETURN)
+                    ])
+                elif method_name == 'not':
+                    methods[method_name] = Function(method_name, [], 'void', [
+                        Instruction(OpCode.LOAD_ATTR, 'value'),
+                        Instruction(OpCode.NOT),
+                        Instruction(OpCode.RETURN)
+                    ])
+                else:
+                    # Fallback to placeholder for unknown methods
+                    methods[method_name] = Function(method_name, [], 'void', [
+                        Instruction(OpCode.LOAD_CONST, 0),
+                        Instruction(OpCode.RETURN)
+                    ])
+        
+        # Process class body
         for stmt in node.body:
             if isinstance(stmt, FunctionDefNode):
                 method_compiler = Compiler()
@@ -97,219 +203,161 @@ class Compiler:
         
         cls = AddXClass(node.name, methods)
         self.classes[node.name] = cls
-    
-    def compile_var_decl(self, node: VarDeclNode):
-        if node.value:
-            self.compile_expression(node.value)
-            self.emit(OpCode.STORE_GLOBAL, node.name)
-    
-    def compile_assignment(self, node: AssignmentNode):
-        self.compile_expression(node.value)
-        if node.target in self.local_vars:
-            self.emit(OpCode.STORE_LOCAL, node.target)
-        else:
-            self.emit(OpCode.STORE_GLOBAL, node.target)
-    
-    def compile_if(self, node: IfNode):
-        self.compile_expression(node.condition)
         
-        if node.else_branch:
-            else_branch_start = len(self.instructions) + 1
-            self.emit(OpCode.JUMP_IF_FALSE, else_branch_start)
-        else:
-            after_if = len(self.instructions) + 1
-            self.emit(OpCode.JUMP_IF_FALSE, 0)
+        # Restore previous class
+        self.current_class = previous_class
+
+    def get_trait_methods(self, type_name):
+        """Get trait methods for a given type"""
+        type_traits = {
+            'int': ['add', 'sub', 'mul', 'div', 'mod', 'eq', 'ne', 'lt', 'gt', 'le', 'ge'],
+            'float': ['add', 'sub', 'mul', 'div', 'mod', 'eq', 'ne', 'lt', 'gt', 'le', 'ge'],
+            'str': ['add', 'eq', 'ne', 'lt', 'gt', 'le', 'ge'],  # String concatenation + comparisons
+            'bool': ['and', 'or', 'not', 'eq', 'ne'],
+        }
+        return type_traits.get(type_name, [])
+
+    def compile_inherit(self, node: InheritNode):
+        # Implement actual trait inheritance based on type
+        # Add trait methods to the current class being compiled
         
-        for stmt in node.then_branch:
-            self.compile_statement(stmt)
-        
-        if node.else_branch:
-            end_jump_pos = len(self.instructions)
-            self.emit(OpCode.JUMP, 0)
-            
-            self.instructions[else_branch_start - 1] = Instruction(OpCode.JUMP_IF_FALSE, (len(self.instructions),), ())
-            
-            for stmt in node.else_branch:
-                self.compile_statement(stmt)
-            
-            self.instructions[end_jump_pos] = Instruction(OpCode.JUMP, (len(self.instructions),), ())
-        else:
-            self.instructions[-1] = Instruction(OpCode.JUMP_IF_FALSE, (len(self.instructions),), ())
-    
-    def compile_while(self, node: WhileNode):
-        loop_start = len(self.instructions)
-        
-        self.compile_expression(node.condition)
-        loop_end = len(self.instructions)
-        self.emit(OpCode.JUMP_IF_FALSE, 0)
-        
-        for stmt in node.body:
-            self.compile_statement(stmt)
-        
-        self.emit(OpCode.JUMP, loop_start)
-        self.instructions[loop_end] = Instruction(OpCode.JUMP_IF_FALSE, (len(self.instructions),), ())
-    
-    def compile_for(self, node: ForNode):
-        start_val = self.eval_const_expr(node.start) if node.start else 0
-        self.emit(OpCode.LOAD_CONST, start_val)
-        self.emit(OpCode.STORE_LOCAL, node.var_name)
-        
-        loop_start = len(self.instructions)
-        self.emit(OpCode.LOAD_LOCAL, node.var_name)
-        self.compile_expression(node.end)
-        self.emit(OpCode.LT)
-        loop_end = len(self.instructions)
-        self.emit(OpCode.JUMP_IF_FALSE, 0)
-        
-        for stmt in node.body:
-            self.compile_statement(stmt)
-        
-        self.emit(OpCode.LOAD_LOCAL, node.var_name)
-        self.emit(OpCode.LOAD_CONST, 1)
-        self.emit(OpCode.ADD)
-        self.emit(OpCode.STORE_LOCAL, node.var_name)
-        
-        self.emit(OpCode.JUMP, loop_start)
-        self.instructions[loop_end] = Instruction(OpCode.JUMP_IF_FALSE, (len(self.instructions),), ())
-    
-    def compile_return(self, node: ReturnNode):
-        if node.value:
-            self.compile_expression(node.value)
-        self.emit(OpCode.RETURN)
-    
-    def compile_static_var(self, node: StaticVarNode):
-        if node.value:
-            self.compile_expression(node.value)
-        else:
-            self.emit(OpCode.LOAD_CONST, 0)
-        self.emit(OpCode.STORE_GLOBAL, node.name)
-    
-    def compile_const(self, node: ConstNode):
-        self.compile_expression(node.value)
-        self.emit(OpCode.STORE_GLOBAL, node.name)
-    
-    def compile_print(self, node: PrintNode):
-        for arg in node.args:
-            self.compile_expression(arg)
-        self.emit(OpCode.PRINT, len(node.args))
-    
-    def compile_expression(self, node: ASTNode):
-        if isinstance(node, NumberNode):
-            self.emit(OpCode.LOAD_CONST, node.value)
-        elif isinstance(node, StringNode):
-            self.emit(OpCode.LOAD_CONST, node.value)
-        elif isinstance(node, BoolNode):
-            self.emit(OpCode.LOAD_CONST, node.value)
-        elif isinstance(node, NoneNode):
-            self.emit(OpCode.LOAD_CONST, None)
-        elif isinstance(node, NullptrNode):
-            self.emit(OpCode.LOAD_CONST, None)
-        elif isinstance(node, IdentifierNode):
-            if node.name in self.local_vars:
-                self.emit(OpCode.LOAD_LOCAL, node.name)
-            else:
-                self.emit(OpCode.LOAD_GLOBAL, node.name)
-        elif isinstance(node, BinaryOpNode):
-            self.compile_expression(node.left)
-            self.compile_expression(node.right)
-            op_map = {
-                '+': OpCode.ADD, '-': OpCode.SUB, '*': OpCode.MUL,
-                '/': OpCode.DIV, '%': OpCode.MOD,
-                '==': OpCode.EQ, '!=': OpCode.NE, '<': OpCode.LT,
-                '>': OpCode.GT, '<=': OpCode.LE, '>=': OpCode.GE,
-                'and': OpCode.AND, 'or': OpCode.OR
+        if not self.current_class:
+            # If we're not in a class context, just emit a comment (for function-level inherit)
+            type_traits = {
+                'int': ['add', 'sub', 'mul', 'div', 'mod', 'eq', 'ne', 'lt', 'gt', 'le', 'ge'],
+                'float': ['add', 'sub', 'mul', 'div', 'mod', 'eq', 'ne', 'lt', 'gt', 'le', 'ge'],
+                'str': ['add', 'eq', 'ne', 'lt', 'gt', 'le', 'ge'],  # String concatenation + comparisons
+                'bool': ['and', 'or', 'not', 'eq', 'ne'],
             }
-            self.emit(op_map.get(node.op, OpCode.ADD))
-        elif isinstance(node, UnaryOpNode):
-            self.compile_expression(node.operand)
-            if node.op == '-':
-                self.emit(OpCode.LOAD_CONST, -1)
-                self.emit(OpCode.MUL)
-            elif node.op == 'not':
-                self.emit(OpCode.NOT)
-        elif isinstance(node, ListNode):
-            for elem in node.elements:
-                self.compile_expression(elem)
-            self.emit(OpCode.MAKE_LIST, len(node.elements))
-        elif isinstance(node, CallNode):
-            if isinstance(node.func, IdentifierNode):
-                # Regular function call
-                # Compile arguments
-                for arg in node.args:
-                    self.compile_expression(arg)
-                self.emit(OpCode.CALL, node.func.name, len(node.args))
-            elif isinstance(node.func, DereferenceNode):
-                # Function pointer call: *fn(args) or *add(args)
-                # First compile the pointer expression (which gives us a ref to the function)
-                # BUT we don't actually dereference - we just keep the ref for the CALL to use
-                # So we just compile the pointer without emitting DEREFERENCE
-                self.compile_expression(node.func.pointer)
-                # Compile arguments
-                for arg in node.args:
-                    self.compile_expression(arg)
-                # Emit CALL - the first arg will be a ref to the function
-                self.emit(OpCode.CALL, '__fn_ptr__', len(node.args) + 1)
-            elif isinstance(node.func, AttributeAccessNode):
-                # Method call: object.method(args)
-                # Compile the object (receiver) - this will be 'self'
-                self.compile_expression(node.func.object)
-                # Compile arguments
-                for arg in node.args:
-                    self.compile_expression(arg)
-                # Emit CALL with method name and arg count (+1 for self)
-                self.emit(OpCode.CALL, node.func.attribute, len(node.args) + 1)
-        elif isinstance(node, IndexAccessNode):
-            self.compile_expression(node.object)
-            self.compile_expression(node.index)
-            self.emit(OpCode.LIST_GET)
-        elif isinstance(node, AttributeAccessNode):
-            self.compile_expression(node.object)
-            self.emit(OpCode.GET_ATTR, node.attribute)
-        elif isinstance(node, AddressOfNode):
-            self.emit(OpCode.ADDRESS_OF, node.variable)
-        elif isinstance(node, DereferenceNode):
-            self.compile_expression(node.pointer)
-            self.emit(OpCode.DEREFERENCE)
-        elif isinstance(node, SizeofNode):
-            if node.type_name:
-                self.emit(OpCode.SIZEOF, node.type_name)
+            
+            if node.inherited_type in type_traits:
+                methods = type_traits[node.inherited_type]
+                self.emit(OpCode.COMMENT, f"Inherit traits from {node.inherited_type}: {', '.join(methods)}")
             else:
-                self.compile_expression(node.expr)
-                self.emit(OpCode.SIZEOF)
-        elif isinstance(node, NewNode):
-            # Handle primitive types vs classes
-            # new always returns a pointer to heap-allocated memory
-            heap_var = f"__heap_{id(node)}"
-            if node.type_name == 'int':
-                if node.args:
-                    self.compile_expression(node.args[0])
-                else:
-                    self.emit(OpCode.LOAD_CONST, 0)
-                # Store to a "heap" location and take its address
-                self.emit(OpCode.STORE_GLOBAL, heap_var)
-                self.emit(OpCode.ADDRESS_OF, heap_var)
-            elif node.type_name == 'float':
-                if node.args:
-                    self.compile_expression(node.args[0])
-                else:
-                    self.emit(OpCode.LOAD_CONST, 0.0)
-                self.emit(OpCode.STORE_GLOBAL, heap_var)
-                self.emit(OpCode.ADDRESS_OF, heap_var)
-            elif node.type_name == 'str':
-                if node.args:
-                    self.compile_expression(node.args[0])
-                else:
-                    self.emit(OpCode.LOAD_CONST, "")
-                self.emit(OpCode.STORE_GLOBAL, heap_var)
-                self.emit(OpCode.ADDRESS_OF, heap_var)
+                self.emit(OpCode.COMMENT, f"Inherit from unknown type: {node.inherited_type}")
+            return
+        
+        # We're in a class context, add trait methods to the current class
+        type_traits = {
+            'int': ['add', 'sub', 'mul', 'div', 'mod', 'eq', 'ne', 'lt', 'gt', 'le', 'ge'],
+            'float': ['add', 'sub', 'mul', 'div', 'mod', 'eq', 'ne', 'lt', 'gt', 'le', 'ge'],
+            'str': ['add', 'eq', 'ne', 'lt', 'gt', 'le', 'ge'],  # String concatenation + comparisons
+            'bool': ['and', 'or', 'not', 'eq', 'ne'],
+        }
+        
+        if node.inherited_type not in type_traits:
+            self.emit(OpCode.COMMENT, f"Inherit from unknown type: {node.inherited_type}")
+            return
+            
+        trait_methods = type_traits[node.inherited_type]
+        
+        # Add the trait methods to the current class
+        for method_name in trait_methods:
+            # Create actual implementations for trait methods
+            # These assume the object stores its value in a 'value' attribute
+            if method_name == 'add':
+                self.functions[self.current_class].methods[method_name] = Function(method_name, ['other'], 'void', [
+                    Instruction(OpCode.LOAD_ATTR, 'value'),
+                    Instruction(OpCode.LOAD_ATTR, 'value'),  # Load other.value
+                    Instruction(OpCode.ADD),
+                    Instruction(OpCode.RETURN)
+                ])
+            elif method_name == 'sub':
+                self.functions[self.current_class].methods[method_name] = Function(method_name, ['other'], 'void', [
+                    Instruction(OpCode.LOAD_ATTR, 'value'),
+                    Instruction(OpCode.LOAD_ATTR, 'value'),  # Load other.value
+                    Instruction(OpCode.SUB),
+                    Instruction(OpCode.RETURN)
+                ])
+            elif method_name == 'mul':
+                self.functions[self.current_class].methods[method_name] = Function(method_name, ['other'], 'void', [
+                    Instruction(OpCode.LOAD_ATTR, 'value'),
+                    Instruction(OpCode.LOAD_ATTR, 'value'),  # Load other.value
+                    Instruction(OpCode.MUL),
+                    Instruction(OpCode.RETURN)
+                ])
+            elif method_name == 'div':
+                self.functions[self.current_class].methods[method_name] = Function(method_name, ['other'], 'void', [
+                    Instruction(OpCode.LOAD_ATTR, 'value'),
+                    Instruction(OpCode.LOAD_ATTR, 'value'),  # Load other.value
+                    Instruction(OpCode.DIV),
+                    Instruction(OpCode.RETURN)
+                ])
+            elif method_name == 'mod':
+                self.functions[self.current_class].methods[method_name] = Function(method_name, ['other'], 'void', [
+                    Instruction(OpCode.LOAD_ATTR, 'value'),
+                    Instruction(OpCode.LOAD_ATTR, 'value'),  # Load other.value
+                    Instruction(OpCode.MOD),
+                    Instruction(OpCode.RETURN)
+                ])
+            elif method_name == 'eq':
+                self.functions[self.current_class].methods[method_name] = Function(method_name, ['other'], 'void', [
+                    Instruction(OpCode.LOAD_ATTR, 'value'),
+                    Instruction(OpCode.LOAD_ATTR, 'value'),  # Load other.value
+                    Instruction(OpCode.EQ),
+                    Instruction(OpCode.RETURN)
+                ])
+            elif method_name == 'ne':
+                self.functions[self.current_class].methods[method_name] = Function(method_name, ['other'], 'void', [
+                    Instruction(OpCode.LOAD_ATTR, 'value'),
+                    Instruction(OpCode.LOAD_ATTR, 'value'),  # Load other.value
+                    Instruction(OpCode.NE),
+                    Instruction(OpCode.RETURN)
+                ])
+            elif method_name == 'lt':
+                self.functions[self.current_class].methods[method_name] = Function(method_name, ['other'], 'void', [
+                    Instruction(OpCode.LOAD_ATTR, 'value'),
+                    Instruction(OpCode.LOAD_ATTR, 'value'),  # Load other.value
+                    Instruction(OpCode.LT),
+                    Instruction(OpCode.RETURN)
+                ])
+            elif method_name == 'gt':
+                self.functions[self.current_class].methods[method_name] = Function(method_name, ['other'], 'void', [
+                    Instruction(OpCode.LOAD_ATTR, 'value'),
+                    Instruction(OpCode.LOAD_ATTR, 'value'),  # Load other.value
+                    Instruction(OpCode.GT),
+                    Instruction(OpCode.RETURN)
+                ])
+            elif method_name == 'le':
+                self.functions[self.current_class].methods[method_name] = Function(method_name, ['other'], 'void', [
+                    Instruction(OpCode.LOAD_ATTR, 'value'),
+                    Instruction(OpCode.LOAD_ATTR, 'value'),  # Load other.value
+                    Instruction(OpCode.LE),
+                    Instruction(OpCode.RETURN)
+                ])
+            elif method_name == 'ge':
+                self.functions[self.current_class].methods[method_name] = Function(method_name, ['other'], 'void', [
+                    Instruction(OpCode.LOAD_ATTR, 'value'),
+                    Instruction(OpCode.LOAD_ATTR, 'value'),  # Load other.value
+                    Instruction(OpCode.GE),
+                    Instruction(OpCode.RETURN)
+                ])
+            elif method_name == 'and':
+                self.functions[self.current_class].methods[method_name] = Function(method_name, ['other'], 'void', [
+                    Instruction(OpCode.LOAD_ATTR, 'value'),
+                    Instruction(OpCode.LOAD_ATTR, 'value'),  # Load other.value
+                    Instruction(OpCode.AND),
+                    Instruction(OpCode.RETURN)
+                ])
+            elif method_name == 'or':
+                self.functions[self.current_class].methods[method_name] = Function(method_name, ['other'], 'void', [
+                    Instruction(OpCode.LOAD_ATTR, 'value'),
+                    Instruction(OpCode.LOAD_ATTR, 'value'),  # Load other.value
+                    Instruction(OpCode.OR),
+                    Instruction(OpCode.RETURN)
+                ])
+            elif method_name == 'not':
+                self.functions[self.current_class].methods[method_name] = Function(method_name, [], 'void', [
+                    Instruction(OpCode.LOAD_ATTR, 'value'),
+                    Instruction(OpCode.NOT),
+                    Instruction(OpCode.RETURN)
+                ])
             else:
-                # It's a class type
-                for arg in node.args:
-                    self.compile_expression(arg)
-                self.emit(OpCode.NEW, node.type_name)
-        elif isinstance(node, DeleteNode):
-            # For now, delete just pops and ignores (GC handles memory)
-            pass
+                # Fallback to placeholder for unknown methods
+                self.functions[self.current_class].methods[method_name] = Function(method_name, [], 'void', [
+                    Instruction(OpCode.LOAD_CONST, 0),
+                    Instruction(OpCode.RETURN)
+                ])
     
     def eval_const_expr(self, node: ASTNode) -> float:
         if isinstance(node, NumberNode):

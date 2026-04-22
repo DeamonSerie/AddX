@@ -32,7 +32,7 @@ class Token:
 
 KEYWORDS = {'def', 'if', 'elif', 'else', 'for', 'while', 'return', 'print',
             'class', 'True', 'False', 'None', 'and', 'or', 'not', 'in', 'range',
-            'nullptr', 'sizeof', 'static', 'const', 'new', 'delete', 'struct'}
+            'nullptr', 'sizeof', 'static', 'const', 'new', 'delete', 'struct', 'inherit'}
 TYPE_KEYWORDS = {'int', 'float', 'str', 'bool', 'void', 'list', 'dict', 'auto'}
 
 def tokenize(source):

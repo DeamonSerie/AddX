@@ -16,6 +16,7 @@ class OpCode(Enum):
     MUL = auto()
     DIV = auto()
     MOD = auto()
+    COMMENT = auto()
     
     EQ = auto()
     NE = auto()
@@ -375,6 +376,10 @@ class AddXVM:
             
             elif op.opcode == OpCode.HALT:
                 break
+            elif op.opcode == OpCode.COMMENT:
+                # Comment opcode - print for debugging
+                print(f"// COMMENT: {op.args[0]}")
+                pass
             
             i += 1
         

@@ -17,6 +17,7 @@ AddX is a programming language with both a virtual machine (VM) interpreter and 
   - Pointer operations (`&`, `*`, `sizeof`)
   - Memory management (`new`, `delete`)
   - Standard output (`print`)
+  - Type inheritance (`inherit` keyword)
 
 ## Building the Project
 
@@ -200,6 +201,66 @@ def main():
     print(p.distance())  # Outputs: 5.0
 ```
 
+### Inherit Keyword
+
+AddX supports inheriting traits from basic types using the `inherit` keyword. This allows classes and functions to automatically gain methods based on the inherited type.
+
+#### Class Inheritance
+Classes can inherit from basic types to get trait-specific methods:
+```addx
+class Calculator inherit int:
+    def add_values(a, b):
+        return self.add(a, b)  // Uses inherited add method
+        
+    def multiply_values(a, b):
+        return self.mul(a, b)  // Uses inherited mul method
+
+class TextProcessor inherit str:
+    def combine(a, b):
+        return self.add(a, b)  // String concatenation
+        
+    def equals(a, b):
+        return self.eq(a, b)   // String equality
+
+class LogicGate inherit bool:
+    def and_gate(a, b):
+        return self.and(a, b)  // Boolean AND
+        
+    def or_gate(a, b):
+        return self.or(a, b)   // Boolean OR
+```
+
+#### Function Return Types
+Functions can specify `{inherit}` as a return type:
+```addx
+def get_number() -> {inherit}:
+    return 42
+    
+def get_text() -> {inherit}:
+    return "hello"
+
+def main():
+    num = get_number()  // Returns int
+    txt = get_text()    // Returns str
+```
+
+#### Standalone Inherit Statements
+The `inherit` keyword can be used inside functions to gain type-specific traits:
+```addx
+def process_value(x):
+    inherit int  // Gain integer traits in this scope
+    return x * 2
+    
+def process_text(s):
+    inherit str  // Gain string traits in this scope
+    return s + " processed"
+```
+
+**Available Traits by Type:**
+- **int/float**: add, sub, mul, div, mod, eq, ne, lt, gt, le, ge
+- **str**: add, eq, ne, lt, gt, le, ge (string operations)
+- **bool**: and, or, not, eq, ne (boolean operations)
+
 ### Memory Management
 
 ```addx
@@ -209,6 +270,46 @@ delete buffer               # Free memory
 ```
 
 ## Examples
+
+### Inherit Keyword Demonstration (`inherit_example.addx`)
+This example shows the new inherit keyword functionality:
+
+```addx
+// Class inheriting from int - gets integer math methods
+class MathOp inherit int:
+    def add_numbers(a, b):
+        return self.add(a, b)
+        
+    def multiply_numbers(a, b):
+        return self.mul(a, b)
+
+// Class inheriting from str - gets string methods
+class StringUtils inherit str:
+    def combine_strings(a, b):
+        return self.add(a, b)
+        
+    def strings_equal(a, b):
+        return self.eq(a, b)
+
+// Function with {inherit} return type
+def get_value() -> {inherit}:
+    return 42
+
+def main():
+    print("=== Inherit Keyword Demo ===")
+    
+    // Test class inheritance
+    math = MathOp()
+    strings = StringUtils()
+    
+    print("Objects created successfully")
+    
+    // Test function return types
+    val = get_value()
+    print("Function with {inherit} return:", val)
+    
+    print("=== Demo Complete ===")
+```
 
 ### Hello World (`hello.addx`)
 
@@ -245,23 +346,26 @@ AddX.exe fib.addx --jit
 ### Adding New Features
 
 1. **Parser (`fast_parse.c`)**:
-   - Add new AST node types in `fast_parse.h`
-   - Implement parsing functions for new constructs
-   - Update `parse_block` or expression parsers as needed
+    - Add new AST node types in `fast_parse.h`
+    - Implement parsing functions for new constructs
+    - Update `parse_block` or expression parsers as needed
+    - For the `inherit` keyword: added handling in `class_()` and `fun()` methods
 
 2. **Compiler (`compiler.c`)**:
-   - Add new OpCode values in `compiler.h` if needed
-   - Implement compilation logic in `compile_expression` or `compile_node`
-   - Handle any new data types or operations
+    - Add new OpCode values in `compiler.h` if needed
+    - Implement compilation logic in `compile_expression` or `compile_node`
+    - Handle any new data types or operations
+    - For the `inherit` keyword: enhanced `compile_class()` to automatically add trait methods and added `compile_inherit()` method
 
 3. **VM (`vm.c`)**:
-   - Add case statements for new opcodes in the `switch` in `run_vm`
-   - Implement the behavior for each new opcode
+    - Add case statements for new opcodes in the `switch` in `run_vm`
+    - Implement the behavior for each new opcode
+    - For the `inherit` keyword: added `COMMENT = auto()` to OpCode enum and handler in run loop
 
 4. **JIT (`jit.c`)**:
-   - Add emission functions for new opcodes
-   - Update the `switch` statement in `jit_compile`
-   - Ensure proper register usage and calling conventions
+    - Add emission functions for new opcodes
+    - Update the `switch` statement in `jit_compile`
+    - Ensure proper register usage and calling conventions
 
 ### Testing Changes
 

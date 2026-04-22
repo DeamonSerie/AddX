@@ -156,3 +156,8 @@ class NewNode(ASTNode):
 @dataclass
 class DeleteNode(ASTNode):
     expr: ASTNode
+
+@dataclass
+class InheritNode(ASTNode):
+    class_name: str
+    inherited_type: str
