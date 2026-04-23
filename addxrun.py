@@ -18,7 +18,7 @@ def assemble(code):
     for line in code.split('\n'):
         stripped = line.strip()
         if stripped.startswith('[Modan]'):
-            # Parse: [Modan] func() -> shift(Ln: 2, Ln: 3)
+            # Parse: [Modan] func() -> shift(Ln: 2, Ln: 3) or [Modan] Class.method() -> shift(...)
             parts = stripped.split('-> shift(')
             if len(parts) > 1:
                 func_part = parts[0].replace('[Modan]', '').strip()
@@ -40,23 +40,42 @@ def assemble(code):
     ops = []
     current_func_lines = []
     current_func = None
+    in_class = False
+    class_name = None
     
     for line in lines:
-        if line.startswith('def '):
+        if line.startswith('class '):
             # Process previous function with modan shift if any
             if current_func and current_func_lines:
                 if modan_shifts.get(current_func):
-                    # Only include specified lines (0-indexed)
                     for idx in modan_shifts[current_func]:
                         if 0 <= idx < len(current_func_lines):
                             parse_line(current_func_lines[idx], ops)
                 else:
-                    # Include all lines
+                    for l in current_func_lines:
+                        parse_line(l, ops)
+            current_func = None
+            current_func_lines = []
+            class_name = line.split(' ')[1].rstrip(':')
+            in_class = True
+            continue
+        elif line.startswith('def '):
+            # Process previous function/method with modan shift if any
+            if current_func and current_func_lines:
+                if modan_shifts.get(current_func):
+                    for idx in modan_shifts[current_func]:
+                        if 0 <= idx < len(current_func_lines):
+                            parse_line(current_func_lines[idx], ops)
+                else:
                     for l in current_func_lines:
                         parse_line(l, ops)
             
-            # Start new function
-            current_func = line.split('(')[0].replace('def ', '')
+            # Start new function/method
+            func_def = line.split('(')[0].replace('def ', '')
+            if in_class and class_name:
+                current_func = f"{class_name}.{func_def}"
+            else:
+                current_func = func_def
             current_func_lines = []
         else:
             # Inside function - collect lines
