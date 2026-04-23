@@ -46,7 +46,8 @@ class OpCode(Enum):
     NEW = auto()
     GET_ATTR = auto()
     SET_ATTR = auto()
-    
+    LOAD_ATTR = auto()
+    STORE_ATTR = auto()
     ADDRESS_OF = auto()
     DEREFERENCE = auto()
     SIZEOF = auto()

@@ -15,8 +15,20 @@ class Compiler:
         return len(self.instructions) - 1
     
     def compile(self, ast: ProgramNode):
+        # First pass: collect all class definitions
         for stmt in ast.statements:
-            self.compile_statement(stmt)
+            if isinstance(stmt, ClassDefNode):
+                self.compile_class(stmt)
+        
+        # Second pass: compile functions and other statements
+        for stmt in ast.statements:
+            if isinstance(stmt, FunctionDefNode):
+                self.compile_function(stmt)
+            elif isinstance(stmt, AssignmentNode):
+                self.compile_assignment(stmt)
+            elif isinstance(stmt, PrintNode):
+                self.compile_print(stmt)
+            # Skip class definitions (already processed)
         
         if not self.functions:
             self.emit(OpCode.HALT)
@@ -75,6 +87,124 @@ class Compiler:
         else:
             # Other expression statement - compile for side effects
             self.compile_expression(node)
+    
+    def compile_print(self, node: PrintNode):
+        for arg in node.args:
+            self.compile_expression(arg)
+            self.emit(OpCode.PRINT)
+    
+    def compile_expression(self, node: ASTNode):
+        if isinstance(node, NumberNode):
+            self.emit(OpCode.LOAD_CONST, node.value)
+        elif isinstance(node, StringNode):
+            self.emit(OpCode.LOAD_CONST, node.value)
+        elif isinstance(node, BoolNode):
+            self.emit(OpCode.LOAD_CONST, 1 if node.value else 0)
+        elif isinstance(node, NoneNode):
+            self.emit(OpCode.LOAD_CONST, None)
+        elif isinstance(node, IdentifierNode):
+            self.compile_identifier(node)
+        elif isinstance(node, BinaryOpNode):
+            self.compile_binary_op(node)
+        elif isinstance(node, UnaryOpNode):
+            self.compile_unary_op(node)
+        elif isinstance(node, ListNode):
+            self.compile_list(node)
+        elif isinstance(node, IndexAccessNode):
+            self.compile_index_access(node)
+        elif isinstance(node, AttributeAccessNode):
+            self.compile_attribute_access(node)
+        elif isinstance(node, CallNode):
+            self.compile_call(node)
+        else:
+            self.emit(OpCode.COMMENT, f"Unknown expr: {type(node).__name__}")
+    
+    def compile_identifier(self, node: IdentifierNode):
+        self.emit(OpCode.LOAD_GLOBAL, node.name)
+    
+    def compile_binary_op(self, node: BinaryOpNode):
+        self.compile_expression(node.left)
+        self.compile_expression(node.right)
+        op_map = {'+': OpCode.ADD, '-': OpCode.SUB, '*': OpCode.MUL, '/': OpCode.DIV, 
+                 '%': OpCode.MOD, '==': OpCode.EQ, '!=': OpCode.NE, '<': OpCode.LT, 
+                 '>': OpCode.GT, '<=': OpCode.LE, '>=': OpCode.GE, 'and': OpCode.AND, 'or': OpCode.OR}
+        self.emit(op_map.get(node.op, OpCode.ADD), node.op)
+    
+    def compile_unary_op(self, node: UnaryOpNode):
+        self.compile_expression(node.operand)
+        if node.op == 'not':
+            self.emit(OpCode.NOT)
+        elif node.op == '-':
+            self.emit(OpCode.MULTI, -1, OpCode.MUL)
+    
+    def compile_list(self, node: ListNode):
+        for elem in node.elements:
+            self.compile_expression(elem)
+        self.emit(OpCode.MAKE_LIST, len(node.elements))
+    
+    def compile_index_access(self, node: IndexAccessNode):
+        self.compile_expression(node.object)
+        self.compile_expression(node.index)
+        self.emit(OpCode.LIST_GET)
+    
+    def compile_attribute_access(self, node: AttributeAccessNode):
+        self.compile_expression(node.object)
+        self.emit(OpCode.GET_ATTR, node.attribute)
+    
+    def compile_call(self, node: CallNode):
+        for arg in node.args:
+            self.compile_expression(arg)
+        if isinstance(node.func, IdentifierNode):
+            # Check if this is a class constructor call
+            if node.func.name in self.classes:
+                self.emit(OpCode.NEW, node.func.name)
+            else:
+                self.emit(OpCode.CALL, node.func.name, len(node.args))
+        elif isinstance(node.func, AttributeAccessNode):
+            self.compile_expression(node.func.object)
+            self.emit(OpCode.GET_ATTR, node.func.attribute)
+            self.emit(OpCode.CALL, 0)
+    
+    def compile_function(self, node: FunctionDefNode):
+        func_compiler = Compiler()
+        func_compiler.local_vars = set(p[0] for p in node.params)
+        
+        for stmt in node.body:
+            func_compiler.compile_statement(stmt)
+        
+        if not any(isinstance(s, ReturnNode) for s in node.body):
+            func_compiler.emit(OpCode.RETURN)
+        
+        self.functions[node.name] = Function(node.name, node.params, node.return_type, 
+                                        func_compiler.instructions)
+    
+    def compile_var_decl(self, node: VarDeclNode):
+        pass
+    
+    def compile_assignment(self, node: AssignmentNode):
+        target_name = node.target.name if isinstance(node.target, IdentifierNode) else str(node.target)
+        self.compile_expression(node.value)
+        self.emit(OpCode.STORE_GLOBAL, target_name)
+    
+    def compile_if(self, node: IfNode):
+        pass
+    
+    def compile_while(self, node: WhileNode):
+        pass
+    
+    def compile_for(self, node: ForNode):
+        pass
+    
+    def compile_return(self, node: ReturnNode):
+        if node.value:
+            self.compile_expression(node.value)
+        self.emit(OpCode.RETURN)
+    
+    def compile_static_var(self, node: StaticVarNode):
+        pass
+    
+    def compile_const(self, node: ConstNode):
+        pass
     
     def compile_class(self, node: ClassDefNode):
         # Set current class for inherit statements

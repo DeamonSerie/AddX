@@ -30,7 +30,7 @@ class VarDeclNode(ASTNode):
 
 @dataclass
 class AssignmentNode(ASTNode):
-    target: str
+    target: ASTNode  # Can be IdentifierNode or AttributeAccessNode
     value: ASTNode
 
 @dataclass

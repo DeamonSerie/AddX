@@ -108,20 +108,29 @@ class AddXParser:
             else:
                 rt = self.expect(TokenType.KEYWORD).value
         
-        self.expect(TokenType.LBRACE)
-        bd = self.block()
+        # Accept either LBRACE (C-style) or COLON (Python-style)
+        if self.check(TokenType.LBRACE):
+            self.consume()
+            bd = self.block()
+        elif self.check(TokenType.COLON):
+            self.consume()
+            bd = self.block(use_colon=True)
+        else:
+            self.expect(TokenType.LBRACE)
         
         return FunctionDefNode(name, ps, rt, bd)
     
-    def block(self, stop_at=None):
+    def block(self, stop_at=None, use_colon=False):
         if stop_at is None:
             stop_at = set()
         bd = []
         depth = 0
+        
         while True:
             self.skip_nl()
             t = self.peek()
             if self.check(TokenType.EOF): break
+            
             if self.check(TokenType.LBRACE):
                 self.consume()
                 depth += 1
@@ -190,14 +199,17 @@ class AddXParser:
             elif self.check(TokenType.KEYWORD):
                 base_class = self.consume().value
         
-        # Skip to first non-newline token, check for LBRACE
+        # Skip to first non-newline token, check for LBRACE or COLON
         while self.check(TokenType.NEWLINE):
             self.consume()
         
-        # Parse class body - expect LBRACE
-        if not self.check(TokenType.LBRACE):
+        # Parse class body - accept either LBRACE (C-style) or COLON (Python-style)
+        if self.check(TokenType.LBRACE):
+            self.consume()
+        elif self.check(TokenType.COLON):
+            self.consume()
+        else:
             self.expect(TokenType.LBRACE)
-        self.consume()
         
         # Parse members (fields and methods) - simplified approach
         members = []
@@ -238,11 +250,19 @@ class AddXParser:
                     self.consume()
                     ret_type = self.expect(TokenType.KEYWORD).value
                 
-                # Parse method body
-                self.expect(TokenType.LBRACE)
-                method_body = self.block(stop_at=set())
-                if self.check(TokenType.RBRACE):
+                # Parse method body - accept either LBRACE or COLON
+                if self.check(TokenType.LBRACE):
                     self.consume()
+                    method_body = self.block(stop_at=set())
+                    if self.check(TokenType.RBRACE):
+                        self.consume()
+                elif self.check(TokenType.COLON):
+                    self.consume()
+                    method_body = self.block(stop_at=set(), use_colon=True)
+                    if self.check(TokenType.RBRACE):
+                        self.consume()
+                else:
+                    self.expect(TokenType.LBRACE)
                 
                 # If first param is 'self', remove it from stored params but add to body
                 # For now, just store all params as-is

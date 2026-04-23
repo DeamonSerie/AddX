@@ -11,6 +11,9 @@ class Op(Enum):
     JMP = 7
     JZ = 8
     HLT = 9
+    ADDR = 10      # &var - get address of variable
+    DEREF = 11     # *ptr - dereference pointer
+    PTR_CALL = 12   # Call function via pointer
 
 def assemble(code):
     # First pass: find all [Modan] declarations
@@ -98,15 +101,53 @@ def assemble(code):
     return ops
 
 def parse_line(line, ops):
+    # Pointer: &var (get address)
+    if line.startswith('&') and not line.startswith('def '):
+        var_name = line[1:].strip()
+        ops.append((Op.ADDR, var_name))
+        return
+    
+    # Dereference in print: *ptr
+    stripped = line.strip()
+    if stripped.startswith('print(*') and stripped.endswith(')'):
+        ptr_expr = stripped[6:-1]  # Extract ptr from print(*ptr)
+        if ptr_expr.startswith('*'):
+            ptr_expr = ptr_expr[1:]  # Remove * prefix
+        ops.append((Op.DEREF, ptr_expr))
+        ops.append((Op.PRINT, ""))
+        return
+    
+    # Dereference without print (assignment): *ptr = value  
+    if '*' in line and '=' in line and not line.startswith('def '):
+        parts = line.split('=', 1)
+        dest = parts[0].strip()[1:].strip()  # *ptr -> ptr
+        src = parts[1].strip()
+        if src.isdigit():
+            ops.append((Op.LOAD, int(src)))
+        else:
+            ops.append((Op.LOAD, src))
+        ops.append((Op.STORE, dest))
+        return
+    
     if line.startswith('print('):
         s = line[6:-1]
         if s.startswith('"'):
             ops.append((Op.PRINT, s.strip('"')))
         elif s.isdigit():
             ops.append((Op.PRINT, int(s)))
+        elif s.startswith('&'):
+            # Print address: print(&var)
+            var_name = s[1:].strip()
+            ops.append((Op.ADDR, var_name))
+            ops.append((Op.PRINT, 'PRINT_STACK'))  # Marker to print from stack
+        elif s.startswith('*'):
+            # Print deref: print(*ptr)
+            ptr_name = s[1:].strip()
+            ops.append((Op.DEREF, ptr_name))
+            ops.append((Op.PRINT, 'PRINT_STACK'))
         else:
             ops.append((Op.PRINT, s))
-    elif '=' in line and ':' not in line:
+    elif '=' in line and ':' not in line and not line.startswith('def '):
         var, expr = line.split('=', 1)
         var = var.strip()
         expr = expr.strip()
@@ -114,6 +155,9 @@ def parse_line(line, ops):
             ops.append((Op.LOAD, int(expr)))
         elif expr[0] == '"':
             ops.append((Op.LOAD, expr.strip('"')))
+        elif expr.startswith('&'):
+            addr_var = expr[1:].strip()
+            ops.append((Op.ADDR, addr_var))
         else:
             ops.append((Op.LOAD, expr))
         ops.append((Op.STORE, var))
@@ -121,22 +165,52 @@ def parse_line(line, ops):
 def run(ops):
     stack = []
     vars = {}
+    addr_of = {}  # Maps ptr var -> original var it points to
     pc = 0
     while pc < len(ops):
         op = ops[pc]
-        if op[0] == Op.LOAD:
-            stack.append(op[1])
-        elif op[0] == Op.STORE:
-            vars[op[1]] = stack.pop()
-        elif op[0] == Op.PRINT:
-            v = op[1]
-            if isinstance(v, str) and v in vars:
-                print(vars[v])
-            elif isinstance(v, str):
-                print(v)
+        opcode = op[0]
+        args = op[1:] if len(op) > 1 else ()
+        
+        if opcode == Op.LOAD:
+            stack.append(args[0])
+        elif opcode == Op.STORE:
+            stored_var = args[0]
+            # Check what we're storing before popping
+            val = stack[-1] if stack else None
+            if isinstance(val, str) and val in vars:
+                # Likely storing an address like &x
+                addr_of[stored_var] = val
+            vars[stored_var] = stack.pop()
+        elif opcode == Op.ADDR:
+            var_name = args[0]
+            # Push the variable name as address
+            stack.append(var_name)
+        elif opcode == Op.DEREF:
+            var_name = args[0]
+            val = vars.get(var_name)
+            stack.append(val)
+        elif opcode == Op.PRINT:
+            if args and args[0] == 'PRINT_STACK':
+                v = stack.pop()
+                if isinstance(v, str):
+                    # Print address with & prefix, value without
+                    if v in vars:
+                        print(f"&{v}")
+                    else:
+                        print(v)
+                else:
+                    print(v)
             else:
-                print(v)
-        elif op[0] == Op.HLT:
+                v = args[0] if args else None
+                if isinstance(v, str):
+                    if v in vars:
+                        print(vars[v])
+                    else:
+                        print(v)
+                else:
+                    print(v)
+        elif opcode == Op.HLT:
             break
         pc += 1
 
