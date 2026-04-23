@@ -13,38 +13,91 @@ class Op(Enum):
     HLT = 9
 
 def assemble(code):
-    lines = [l.strip() for l in code.split('\n') if l.strip() and not l.strip().startswith('#')]
+    # First pass: find all [Modan] declarations
+    modan_shifts = {}
+    for line in code.split('\n'):
+        stripped = line.strip()
+        if stripped.startswith('[Modan]'):
+            # Parse: [Modan] func() -> shift(Ln: 2, Ln: 3)
+            parts = stripped.split('-> shift(')
+            if len(parts) > 1:
+                func_part = parts[0].replace('[Modan]', '').strip()
+                # Remove () from function name
+                func_name = func_part.replace('()', '').strip()
+                shift_part = parts[1].rstrip(')').replace('Ln: ', '')
+                line_nums = [int(x.strip()) for x in shift_part.split(',')]
+                # Store as 0-indexed
+                modan_shifts[func_name] = [x - 1 for x in line_nums]
+    
+    # Second pass: collect code lines
+    lines = []
+    for l in code.split('\n'):
+        stripped = l.strip()
+        # Skip comments, [Modan] lines
+        if stripped and not stripped.startswith('#') and not stripped.startswith('//') and not stripped.startswith('['):
+            lines.append(stripped)
+    
     ops = []
+    current_func_lines = []
+    current_func = None
+    
     for line in lines:
         if line.startswith('def '):
-            continue
-        if line.startswith('print('):
-            s = line[6:-1]
-            if s.startswith('"'):
-                ops.append((Op.PRINT, s.strip('"')))
-            elif s.isdigit():
-                ops.append((Op.PRINT, int(s)))
+            # Process previous function with modan shift if any
+            if current_func and current_func_lines:
+                if modan_shifts.get(current_func):
+                    # Only include specified lines (0-indexed)
+                    for idx in modan_shifts[current_func]:
+                        if 0 <= idx < len(current_func_lines):
+                            parse_line(current_func_lines[idx], ops)
+                else:
+                    # Include all lines
+                    for l in current_func_lines:
+                        parse_line(l, ops)
+            
+            # Start new function
+            current_func = line.split('(')[0].replace('def ', '')
+            current_func_lines = []
+        else:
+            # Inside function - collect lines
+            if current_func:
+                current_func_lines.append(line)
             else:
-                ops.append((Op.PRINT, s))
-        elif '=' in line and ':' not in line:
-            var, expr = line.split('=', 1)
-            var = var.strip()
-            expr = expr.strip()
-            if expr.isdigit():
-                ops.append((Op.LOAD, int(expr)))
-            elif expr[0] == '"':
-                ops.append((Op.LOAD, expr.strip('"')))
-            else:
-                ops.append((Op.LOAD, expr))
-            ops.append((Op.STORE, var))
-        elif line.startswith('if '):
-            pass
-        elif line.startswith('while '):
-            pass
-        elif line.startswith('for '):
-            pass
+                parse_line(line, ops)
+    
+    # Handle last function
+    if current_func and current_func_lines:
+        if modan_shifts.get(current_func):
+            for idx in modan_shifts[current_func]:
+                if 0 <= idx < len(current_func_lines):
+                    parse_line(current_func_lines[idx], ops)
+        else:
+            for l in current_func_lines:
+                parse_line(l, ops)
+    
     ops.append((Op.HLT,))
     return ops
+
+def parse_line(line, ops):
+    if line.startswith('print('):
+        s = line[6:-1]
+        if s.startswith('"'):
+            ops.append((Op.PRINT, s.strip('"')))
+        elif s.isdigit():
+            ops.append((Op.PRINT, int(s)))
+        else:
+            ops.append((Op.PRINT, s))
+    elif '=' in line and ':' not in line:
+        var, expr = line.split('=', 1)
+        var = var.strip()
+        expr = expr.strip()
+        if expr.isdigit():
+            ops.append((Op.LOAD, int(expr)))
+        elif expr[0] == '"':
+            ops.append((Op.LOAD, expr.strip('"')))
+        else:
+            ops.append((Op.LOAD, expr))
+        ops.append((Op.STORE, var))
 
 def run(ops):
     stack = []

@@ -64,6 +64,14 @@ class Compiler:
             pass
         elif isinstance(node, InheritNode):
             self.compile_inherit(node)
+        elif isinstance(node, SimpleNode):
+            self.compile_simple(node)
+        elif isinstance(node, SimpleNumNode):
+            self.compile_simple(node)
+        elif isinstance(node, ModanNode):
+            # Modan: modifies execution order - only execute specified lines
+            # args[0] = function name, args[1] = list of line numbers to execute
+            self.emit(OpCode.MODAN, node.target, node.lines)
         else:
             # Other expression statement - compile for side effects
             self.compile_expression(node)
@@ -358,6 +366,17 @@ class Compiler:
                     Instruction(OpCode.LOAD_CONST, 0),
                     Instruction(OpCode.RETURN)
                 ])
+    
+    def compile_simple(self, node):
+        if isinstance(node, SimpleNode):
+            # simple type for strings - stores as list of characters
+            char_list = list(node.value)
+            self.emit(OpCode.LOAD_CONST, char_list)
+        elif isinstance(node, SimpleNumNode):
+            # simple type for numbers - creates list from 0 to end value
+            end_val = int(node.value)
+            num_list = list(range(end_val + 1))  # [0, 1, 2, ..., end_val]
+            self.emit(OpCode.LOAD_CONST, num_list)
     
     def eval_const_expr(self, node: ASTNode) -> float:
         if isinstance(node, NumberNode):

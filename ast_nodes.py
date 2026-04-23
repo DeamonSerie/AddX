@@ -81,6 +81,14 @@ class StringNode(ASTNode):
     value: str
 
 @dataclass
+class SimpleNode(ASTNode):
+    value: str
+
+@dataclass
+class SimpleNumNode(ASTNode):
+    value: float
+
+@dataclass
 class BoolNode(ASTNode):
     value: bool
 
@@ -161,3 +169,9 @@ class DeleteNode(ASTNode):
 class InheritNode(ASTNode):
     class_name: str
     inherited_type: str
+
+@dataclass
+class ModanNode(ASTNode):
+    name: str
+    target: str
+    lines: list[int]

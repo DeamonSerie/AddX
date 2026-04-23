@@ -1,5 +1,6 @@
 from tokenizer import TokenType, tokenize
 from ast_nodes import *
+from ast_nodes import ModanNode
 
 class AddXParser:
     def __init__(self, tokens):
@@ -34,6 +35,10 @@ class AddXParser:
     def stmt(self):
         if self.check(TokenType.EOF): return None
         if self.check(TokenType.RBRACE): return None
+        # Check for [Modan] modifier
+        if self.check(TokenType.LBRACKET):
+            if self.peek(1).type == TokenType.KEYWORD and self.peek(1).value == 'modan':
+                return self.modan_stmt()
         if self.check(TokenType.KEYWORD):
             v = self.peek().value
             if v == 'def': return self.fun()
@@ -49,6 +54,36 @@ class AddXParser:
             if v == 'new': return self.parse_new()
             if v == 'delete': return self.parse_delete()
         return self.expr_stmt()
+    
+    def modan_stmt(self):
+        self.consume()  # consume [
+        self.consume()  # consume 'modan'
+        # Now parse what the modan is applied to
+        if self.check(TokenType.KEYWORD) and self.peek().value == 'def':
+            return self.fun()
+        if self.check(TokenType.KEYWORD) and self.peek().value == 'class':
+            return self.class_()
+        if self.check(TokenType.IDENTIFIER):
+            # This is a modan call: [Modan] func() -> shift(...)
+            return self.modan_call()
+        return self.expr_stmt()
+    
+    def modan_call(self):
+        target = self.expect(TokenType.IDENTIFIER).value
+        # Check for -> shift(...)
+        self.expect(TokenType.ARROW)
+        self.expect(TokenType.KEYWORD)  # shift
+        self.expect(TokenType.LPAREN)
+        # Parse line numbers
+        lines = []
+        while not self.check(TokenType.RPAREN):
+            if lines: self.expect(TokenType.COMMA)
+            # Parse Ln: number
+            self.expect(TokenType.IDENTIFIER)  # Ln
+            self.expect(TokenType.COLON)
+            lines.append(int(self.expect(TokenType.NUMBER).value))
+        self.expect(TokenType.RPAREN)
+        return ModanNode("modan", target, lines)
     
     def fun(self):
         self.consume()
@@ -149,7 +184,11 @@ class AddXParser:
         base_class = None
         if self.check(TokenType.KEYWORD) and self.peek().value == 'inherit':
             self.consume()  # consume 'inherit'
-            base_class = self.expect(TokenType.IDENTIFIER).value
+            # Can be IDENTIFIER or TYPE_KEYWORD (like simple, int, str, etc.)
+            if self.check(TokenType.IDENTIFIER):
+                base_class = self.consume().value
+            elif self.check(TokenType.KEYWORD):
+                base_class = self.consume().value
         
         # Skip to first non-newline token, check for LBRACE
         while self.check(TokenType.NEWLINE):
@@ -446,6 +485,12 @@ class AddXParser:
             if t.value == 'nullptr':
                 self.consume()
                 return NullptrNode()
+            if t.value == 'simple':
+                self.consume()
+                self.expect(TokenType.LPAREN)
+                val = self.expect(TokenType.STRING).value
+                self.expect(TokenType.RPAREN)
+                return SimpleNode(val)
             if t.value == 'sizeof':
                 self.consume()
                 self.expect(TokenType.LPAREN)
@@ -493,6 +538,25 @@ class AddXParser:
                     return VarDeclNode(nm, vt, self.exp())
                 return VarDeclNode(nm, vt, None)
             return IdentifierNode(nm)
+        if t.type == TokenType.KEYWORD and t.value == 'simple':
+            self.consume()
+            if self.check(TokenType.LPAREN):
+                self.consume()
+                val = self.expect(TokenType.STRING).value
+                self.expect(TokenType.RPAREN)
+                return SimpleNode(val)
+            elif self.check(TokenType.OPERATOR, '='):
+                self.consume()
+                # Check if it's a string or number
+                if self.check(TokenType.STRING):
+                    val = self.expect(TokenType.STRING).value
+                    return SimpleNode(val)
+                elif self.check(TokenType.NUMBER):
+                    num_val = self.expect(TokenType.NUMBER).value
+                    # Create SimpleNumNode for numeric simple types
+                    return SimpleNumNode(float(num_val))
+                return SimpleNode("")
+            return SimpleNode("")
         if t.type == TokenType.AMPERSAND:
             self.consume()
             vn = self.expect(TokenType.IDENTIFIER).value

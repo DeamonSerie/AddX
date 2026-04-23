@@ -50,7 +50,7 @@ class OpCode(Enum):
     ADDRESS_OF = auto()
     DEREFERENCE = auto()
     SIZEOF = auto()
-    
+    MODAN = auto()
     HALT = auto()
 
 @dataclass
@@ -82,6 +82,7 @@ class AddXVM:
         self.call_stack: list[dict] = []
         self.pc = 0
         self.ip = 0
+        self._modan_shift: tuple = None
     
     def run(self, instructions: list[Instruction], locals_dict: dict = None) -> Any:
         stack = []
@@ -258,7 +259,17 @@ class AddXVM:
                 elif func_name in self.functions:
                     func = self.functions[func_name]
                     new_locals = dict(zip([p[0] for p in func.params], args))
-                    result = self.run(func.instructions, new_locals)
+                    
+                    # Check if there's a modan shift for this function
+                    if self._modan_shift and self._modan_shift[0] == func_name:
+                        modan_func, modan_lines = self._modan_shift
+                        print(f"// Modan executing {func_name} with line filter: {modan_lines}")
+                        # Only execute the specified lines
+                        filtered_instructions = [func.instructions[i] for i in modan_lines if i < len(func.instructions)]
+                        result = self.run(filtered_instructions, new_locals)
+                    else:
+                        result = self.run(func.instructions, new_locals)
+                    
                     if func.return_type != 'void':
                         stack.append(result)
                 elif func_name in self.classes:
@@ -374,12 +385,21 @@ class AddXVM:
                     else:
                         stack.append(4)
             
-            elif op.opcode == OpCode.HALT:
+            if op.opcode == OpCode.HALT:
                 break
             elif op.opcode == OpCode.COMMENT:
                 # Comment opcode - print for debugging
                 print(f"// COMMENT: {op.args[0]}")
                 pass
+            elif op.opcode == OpCode.MODAN:
+                # MODAN: modifies execution order - only execute specified lines
+                # args[0] = function name, args[1] = list of line numbers to execute
+                modan_func = op.args[0]
+                modan_lines = op.args[1] if len(op.args) > 1 else []
+                print(f"// Modan activated for: {modan_func}")
+                print(f"// Will execute only line indices: {modan_lines}")
+                # Store for later use when calling the function
+                self._modan_shift = (modan_func, modan_lines)
             
             i += 1
         

@@ -119,6 +119,8 @@ def main():
 - **Booleans**: `True`, `False`
 - **None**: `None` (null value)
 - **Lists**: `[1, 2, 3]`
+- **Simple**: String or number list type with index access
+- **Modan**: Execution flow control type
 
 ### Variables
 
@@ -260,6 +262,52 @@ def process_text(s):
 - **int/float**: add, sub, mul, div, mod, eq, ne, lt, gt, le, ge
 - **str**: add, eq, ne, lt, gt, le, ge (string operations)
 - **bool**: and, or, not, eq, ne (boolean operations)
+
+### Simple Data Type
+
+The `simple` data type creates indexable lists from strings or numbers:
+
+```addx
+x = simple = "Where"     # Creates ['W', 'h', 'e', 'r', 'e']
+print(x[0])              # W - character at position 0
+
+y = simple = 3           # Creates [0, 1, 2, 3]
+print(y[0])              # 0
+print(y[1])              # 1
+print(y[2])              # 2
+```
+
+- **String simple**: Creates a list of characters (indexable)
+- **Number simple**: Creates a list from 0 to the value (inclusive)
+
+### Modan Data Type
+
+The `modan` data type controls execution order by specifying which lines to execute:
+
+```addx
+def main():
+    print("LINE_1")
+    print("LINE_2")
+    print("LINE_3")
+
+[Modan] main() -> shift(Ln: 2, Ln: 3)
+```
+
+- Use `[Modan]` before a function to mark it
+- Use `-> shift(Ln: x, Ln: y)` to specify which lines to execute
+- Only the specified lines will run, others are skipped
+
+**Example:**
+```addx
+def main():
+    print("LINE_1")
+    print("LINE_2")
+    print("LINE_3")
+
+[Modan] main() -> shift(Ln: 2, Ln: 3)
+```
+
+Output: `LINE_2` `LINE_3` (only lines 2 and 3 execute, line 1 is skipped)
 
 ### Memory Management
 

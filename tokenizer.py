@@ -13,6 +13,8 @@ class TokenType(Enum):
     RBRACE = auto()
     LBRACKET = auto()
     RBRACKET = auto()
+    LBRACKET_SQUARE = auto()
+    RBRACKET_SQUARE = auto()
     COLON = auto()
     COMMA = auto()
     ARROW = auto()
@@ -32,8 +34,8 @@ class Token:
 
 KEYWORDS = {'def', 'if', 'elif', 'else', 'for', 'while', 'return', 'print',
             'class', 'True', 'False', 'None', 'and', 'or', 'not', 'in', 'range',
-            'nullptr', 'sizeof', 'static', 'const', 'new', 'delete', 'struct', 'inherit'}
-TYPE_KEYWORDS = {'int', 'float', 'str', 'bool', 'void', 'list', 'dict', 'auto'}
+            'nullptr', 'sizeof', 'static', 'const', 'new', 'delete', 'struct', 'inherit', 'simple', 'modan'}
+TYPE_KEYWORDS = {'int', 'float', 'str', 'bool', 'void', 'list', 'dict', 'auto', 'simple', 'modan'}
 
 def tokenize(source):
     lines = source.replace('\r\n', '\n').replace('\r', '\n').split('\n')
@@ -42,7 +44,7 @@ def tokenize(source):
     for line_num, line in enumerate(lines, 1):
         stripped = line.lstrip()
         
-        if not stripped or stripped.startswith('#'):
+        if not stripped or stripped.startswith('#') or stripped.startswith('//'):
             tokens.append(Token(TokenType.NEWLINE, '', line_num, 1))
             continue
         
